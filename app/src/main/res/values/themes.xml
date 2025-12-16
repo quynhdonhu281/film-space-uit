@@ -5,5 +5,10 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="CustomBottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconTint">@color/color_main</item>
+        <item name="itemTextColor">@color/color_main</item>
+    </style>
+
     <style name="Theme.FilmSpace_Mobile" parent="Base.Theme.FilmSpace_Mobile" />
 </resources>
