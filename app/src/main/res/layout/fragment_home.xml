@@ -9,6 +9,11 @@
     android:focusableInTouchMode="true"
     android:layout_margin="20dp">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -121,7 +126,8 @@
 <!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
 <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
@@ -170,11 +176,21 @@
                         android:layout_height="match_parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
+                    <include
+                        android:id="@+id/shimmerBestMovies"
+                        layout="@layout/shimmer_movies_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <ProgressBar
                         android:id="@+id/bestMoviesProgressBar"
                         style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -205,11 +221,21 @@
                         android:paddingEnd="12dp"
                         app:layout_constraintStart_toStartOf="parent" />
 
+                    <include
+                        android:id="@+id/shimmerGenres"
+                        layout="@layout/shimmer_genres_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <ProgressBar
                         android:id="@+id/categoryProgressBar"
                         style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -243,18 +269,41 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <include
+                        android:id="@+id/shimmerUpcomingMovies"
+                        layout="@layout/shimmer_movies_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <ProgressBar
                         android:id="@+id/upcomingMoviesProgressBar"
                         style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@+id/upcomingMoviesRecyclerView"
                         app:layout_constraintStart_toStartOf="@+id/upcomingMoviesRecyclerView"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Scroll to Top Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabScrollToTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="80dp"
+            android:src="@android:drawable/ic_menu_upload"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@android:color/white" />
 
 <!--        <androidx.coordinatorlayout.widget.CoordinatorLayout-->
 <!--            android:layout_width="match_parent"-->
@@ -265,4 +314,7 @@
 
 <!--        </androidx.coordinatorlayout.widget.CoordinatorLayout>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 </FrameLayout>

@@ -2,9 +2,19 @@ package com.example.filmspace_mobile.data.local;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
+import com.example.filmspace_mobile.BuildConfig;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 public class UserSessionManager {
-    private static final String PREF_NAME = "filmspace_mobileSession";
+    private static final String TAG = "UserSessionManager";
+    private static final String PREF_NAME = "filmspace_mobile_secure_session";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_USERNAME = "username";
@@ -14,11 +24,31 @@ public class UserSessionManager {
     private static final String KEY_TOKEN = "token";
 
     private final SharedPreferences prefs;
-    private final SharedPreferences.Editor editor;
 
     public UserSessionManager(Context context) {
-        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        editor = prefs.edit();
+        SharedPreferences tempPrefs;
+        try {
+            // Create or retrieve master key for encryption
+            MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            // Create encrypted shared preferences
+            tempPrefs = EncryptedSharedPreferences.create(
+                    context,
+                    PREF_NAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (GeneralSecurityException | IOException e) {
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "Failed to create encrypted preferences, falling back to standard", e);
+            }
+            // Fallback to standard SharedPreferences if encryption fails
+            tempPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        }
+        prefs = tempPrefs;
     }
 
     /**
@@ -27,6 +57,8 @@ public class UserSessionManager {
      */
     public void saveUserSession(int userId, String username, String email, 
                                  String avatarUrl, String name, String token) {
+        SharedPreferences.Editor editor = prefs.edit();
+        
         // Clear any existing user data first
         editor.clear();
         
@@ -94,6 +126,7 @@ public class UserSessionManager {
      * Clear user session (logout)
      */
     public void clearSession() {
+        SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.apply();
     }
@@ -102,6 +135,7 @@ public class UserSessionManager {
      * Update avatar URL
      */
     public void updateAvatarUrl(String avatarUrl) {
+        SharedPreferences.Editor editor = prefs.edit();
         editor.putString(KEY_AVATAR_URL, avatarUrl);
         editor.apply();
     }
@@ -110,6 +144,7 @@ public class UserSessionManager {
      * Update user name
      */
     public void updateName(String name) {
+        SharedPreferences.Editor editor = prefs.edit();
         editor.putString(KEY_NAME, name);
         editor.apply();
     }

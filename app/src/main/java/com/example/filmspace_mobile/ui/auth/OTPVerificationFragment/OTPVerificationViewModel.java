@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.data.api.ApiService;
 import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
@@ -75,11 +76,15 @@ public class OTPVerificationViewModel extends AndroidViewModel {
                     try {
                         if (response.errorBody() != null) {
                             String errorBody = response.errorBody().string();
-                            Log.e(TAG, "Error body: " + errorBody);
-                            errorMessage = "OTP verification failed: " + errorBody;
+                            if (BuildConfig.DEBUG) {
+                                Log.e(TAG, "Error body: " + errorBody);
+                            }
+                            errorMessage = "Invalid or expired OTP. Please try again.";
                         }
                     } catch (IOException e) {
-                        Log.e(TAG, "Error reading error body", e);
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
                     }
                     verifyOTPErrorLiveData.setValue(errorMessage);
                 }

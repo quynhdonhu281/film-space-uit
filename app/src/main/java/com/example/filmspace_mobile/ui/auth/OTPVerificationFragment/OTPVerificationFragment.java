@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.example.filmspace_mobile.ui.main.MainActivity;

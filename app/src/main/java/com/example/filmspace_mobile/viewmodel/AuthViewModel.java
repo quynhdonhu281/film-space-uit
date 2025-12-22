@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.data.api.ApiService;
 import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
@@ -26,6 +27,8 @@ import com.example.filmspace_mobile.data.model.auth.VerifyOTPResponse;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -125,14 +128,44 @@ public class AuthViewModel extends AndroidViewModel {
                     );
                     loginResponseLiveData.setValue(loginResponse);
                 } else {
-                    loginErrorLiveData.setValue("Login failed: " + response.message());
+                    String errorMsg;
+                    switch (response.code()) {
+                        case 401:
+                            errorMsg = "Invalid email or password";
+                            break;
+                        case 403:
+                            errorMsg = "Account is disabled. Contact support.";
+                            break;
+                        case 404:
+                            errorMsg = "Service unavailable. Try again later.";
+                            break;
+                        case 500:
+                        case 502:
+                        case 503:
+                            errorMsg = "Server error. Please try again later.";
+                            break;
+                        default:
+                            errorMsg = "Unable to sign in. Please try again.";
+                    }
+                    loginErrorLiveData.setValue(errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 loginLoadingLiveData.setValue(false);
-                loginErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg;
+                if (t instanceof UnknownHostException || t instanceof IOException) {
+                    errorMsg = "No internet connection. Please check your network.";
+                } else if (t instanceof SocketTimeoutException) {
+                    errorMsg = "Request timed out. Please try again.";
+                } else {
+                    errorMsg = "Something went wrong. Please try again later.";
+                    if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "Login failed", t);
+                    }
+                }
+                loginErrorLiveData.setValue(errorMsg);
             }
         });
     }
@@ -148,17 +181,55 @@ public class AuthViewModel extends AndroidViewModel {
                 registerLoadingLiveData.setValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     registerResponseLiveData.setValue(response.body());
-                } else if (response.code() == 400) {
-                    registerErrorLiveData.setValue("Registration failed: User already exists or invalid data");
                 } else {
-                    registerErrorLiveData.setValue("Registration failed: " + response.message());
+                    String errorMessage = "Registration failed";
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            if (BuildConfig.DEBUG) {
+                                Log.e(TAG, "Register error body: " + errorBody);
+                            }
+                            
+                            // Try to parse as JSON to extract message
+                            if (errorBody.contains("message")) {
+                                Gson gson = new Gson();
+                                ErrorResponse errorResponse = gson.fromJson(errorBody, ErrorResponse.class);
+                                if (errorResponse != null && errorResponse.message != null) {
+                                    errorMessage = errorResponse.message;
+                                }
+                            } else if (response.code() == 409) {
+                                errorMessage = "Email or username already exists";
+                            } else {
+                                errorMessage = "Registration failed. Please try again.";
+                            }
+                        } else {
+                            errorMessage = response.code() == 409 ? "Email or username already exists" : "Registration failed. Please try again.";
+                        }
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                        errorMessage = "Registration failed. Please try again.";
+                    }
+                    registerErrorLiveData.setValue(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
                 registerLoadingLiveData.setValue(false);
-                registerErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg;
+                if (t instanceof UnknownHostException || t instanceof IOException) {
+                    errorMsg = "No internet connection. Please check your network.";
+                } else if (t instanceof SocketTimeoutException) {
+                    errorMsg = "Request timed out. Please try again.";
+                } else {
+                    errorMsg = "Something went wrong. Please try again later.";
+                    if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "Registration failed", t);
+                    }
+                }
+                registerErrorLiveData.setValue(errorMsg);
             }
         });
     }
@@ -185,15 +256,18 @@ public class AuthViewModel extends AndroidViewModel {
                     );
                     verifyOTPResponseLiveData.setValue(verifyResponse);
                 } else {
-                    String errorMessage = "OTP verification failed";
+                    String errorMessage = response.code() == 401 || response.code() == 400 
+                        ? "Invalid or expired OTP. Please try again." 
+                        : "OTP verification failed. Please try again.";
                     try {
-                        if (response.errorBody() != null) {
+                        if (response.errorBody() != null && BuildConfig.DEBUG) {
                             String errorBody = response.errorBody().string();
                             Log.e(TAG, "Error body: " + errorBody);
-                            errorMessage = "OTP verification failed: " + errorBody;
                         }
                     } catch (IOException e) {
-                        Log.e(TAG, "Error reading error body", e);
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
                     }
                     verifyOTPErrorLiveData.setValue(errorMessage);
                 }
@@ -202,7 +276,18 @@ public class AuthViewModel extends AndroidViewModel {
             @Override
             public void onFailure(Call<VerifyOTPResponse> call, Throwable t) {
                 verifyOTPLoadingLiveData.setValue(false);
-                verifyOTPErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg;
+                if (t instanceof UnknownHostException || t instanceof IOException) {
+                    errorMsg = "No internet connection. Please check your network.";
+                } else if (t instanceof SocketTimeoutException) {
+                    errorMsg = "Request timed out. Please try again.";
+                } else {
+                    errorMsg = "Something went wrong. Please try again later.";
+                    if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "OTP verification failed", t);
+                    }
+                }
+                verifyOTPErrorLiveData.setValue(errorMsg);
             }
         });
     }
@@ -220,14 +305,17 @@ public class AuthViewModel extends AndroidViewModel {
                     String message = response.body().getMessage();
                     resendOTPResponseLiveData.setValue(message != null ? message : "OTP resent successfully");
                 } else {
-                    resendOTPErrorLiveData.setValue("Failed to resend OTP");
+                    resendOTPErrorLiveData.setValue("Failed to resend OTP. Please try again.");
                 }
             }
 
             @Override
             public void onFailure(Call<ResendOTPResponse> call, Throwable t) {
                 resendOTPLoadingLiveData.setValue(false);
-                resendOTPErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
+                    ? "No internet connection. Please check your network." 
+                    : "Failed to resend OTP. Please try again.";
+                resendOTPErrorLiveData.setValue(errorMsg);
             }
         });
     }
@@ -245,14 +333,19 @@ public class AuthViewModel extends AndroidViewModel {
                     String message = response.body().getMessage();
                     forgotPasswordResponseLiveData.setValue(message != null ? message : "OTP sent successfully");
                 } else {
-                    forgotPasswordErrorLiveData.setValue("Failed to send OTP");
+                    forgotPasswordErrorLiveData.setValue(response.code() == 404 
+                        ? "Email not found. Please check your email." 
+                        : "Failed to send OTP. Please try again.");
                 }
             }
 
             @Override
             public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
                 forgotPasswordLoadingLiveData.setValue(false);
-                forgotPasswordErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
+                    ? "No internet connection. Please check your network." 
+                    : "Failed to send OTP. Please try again.";
+                forgotPasswordErrorLiveData.setValue(errorMsg);
             }
         });
     }
@@ -269,15 +362,27 @@ public class AuthViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     resetPasswordResponseLiveData.setValue(response.body());
                 } else {
-                    resetPasswordErrorLiveData.setValue("Password reset failed: " + response.message());
+                    String errorMsg = response.code() == 401 || response.code() == 400 
+                        ? "Invalid or expired OTP. Please try again." 
+                        : "Failed to reset password. Please try again.";
+                    resetPasswordErrorLiveData.setValue(errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<ResetPasswordResponse> call, Throwable t) {
                 resetPasswordLoadingLiveData.setValue(false);
-                resetPasswordErrorLiveData.setValue("Error: " + t.getMessage());
+                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
+                    ? "No internet connection. Please check your network." 
+                    : "Failed to reset password. Please try again.";
+                resetPasswordErrorLiveData.setValue(errorMsg);
             }
         });
+    }
+
+    // Helper class for error response parsing
+    private static class ErrorResponse {
+        String message;
+        String error;
     }
 }

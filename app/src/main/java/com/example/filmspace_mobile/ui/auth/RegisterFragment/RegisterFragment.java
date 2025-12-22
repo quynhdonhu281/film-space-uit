@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.google.android.material.textfield.TextInputEditText;
@@ -56,22 +57,28 @@ public class RegisterFragment extends Fragment {
         // Observe register response
         authViewModel.getRegisterResponse().observe(getViewLifecycleOwner(), registerResponse -> {
             if (registerResponse != null && registerResponse.getMessage() != null) {
-                android.util.Log.d("RegisterFragment", "Register response: message=" + registerResponse.getMessage() + ", email=" + registerResponse.getEmail());
+                if (BuildConfig.DEBUG) {
+                    android.util.Log.d("RegisterFragment", "Register response: message=" + registerResponse.getMessage() + ", email=" + registerResponse.getEmail());
+                }
                 Toast.makeText(requireContext(), "Registration successful! OTP sent to your email", Toast.LENGTH_SHORT).show();
                 // Navigate to OTP verification with email
                 Bundle bundle = new Bundle();
                 bundle.putString("email", userEmail);
                 Navigation.findNavController(view).navigate(R.id.action_registerFragment_to_OTPVerificationFragment, bundle);
             } else {
-                android.util.Log.d("RegisterFragment", "Register response is null or no message");
+                if (BuildConfig.DEBUG) {
+                    android.util.Log.d("RegisterFragment", "Register response is null or no message");
+                }
             }
         });
 
         // Observe register error
         authViewModel.getRegisterError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                android.util.Log.e("RegisterFragment", "Register error: " + error);
-                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+                if (BuildConfig.DEBUG) {
+                    android.util.Log.e("RegisterFragment", "Register error: " + error);
+                }
+                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show();
             }
         });
 

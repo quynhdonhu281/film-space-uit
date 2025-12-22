@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.filmspace_mobile"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.filmspace_mobile"
@@ -16,15 +14,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // API Base URL configuration
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.186.100:8080/\"")
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.186.100:8080/\"")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // TODO: Update this URL to your production API before release
+            buildConfigField("String", "API_BASE_URL", "\"https://your-production-api.com/\"")
         }
     }
     compileOptions {
@@ -33,6 +40,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -62,4 +70,13 @@ dependencies {
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.7.0")
+
+    // Security - EncryptedSharedPreferences
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    
+    // Shimmer effect for skeleton loading
+    implementation ("com.facebook.shimmer:shimmer:0.5.0")
+    
+    // SwipeRefreshLayout for pull-to-refresh
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }
