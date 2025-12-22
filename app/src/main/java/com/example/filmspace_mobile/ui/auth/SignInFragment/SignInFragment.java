@@ -25,6 +25,9 @@ import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.example.filmspace_mobile.ui.main.MainActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SignInFragment extends Fragment {
 
     private TextInputEditText emailInput, passwordInput;

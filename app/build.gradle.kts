@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -16,12 +17,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         // API Base URL configuration
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.186.100:8080/\"")
+        // Use 10.0.2.2 for Android Emulator to access host machine's localhost
+        // Use your actual IP (e.g., 10.0.186.100) for physical device
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080/\"")
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.186.100:8080/\"")
+            // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080/\"")
         }
         release {
             isMinifyEnabled = true
@@ -44,6 +48,12 @@ android {
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -51,9 +61,15 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    
+    // Testing Dependencies
     testImplementation(libs.junit)
+    testImplementation("org.mockito:mockito-core:5.8.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("org.mockito:mockito-android:5.8.0")
 
     implementation ("com.google.android.material:material:1.14.0-alpha07")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
@@ -63,20 +79,23 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation ("com.android.volley:volley:1.2.1")
-    implementation ("com.google.code.gson:gson:2.9.1")
+    implementation ("com.google.code.gson:gson:2.10.1")
     implementation ("com.google.android.flexbox:flexbox:3.0.0")
 
     // ViewModel and LiveData
-    implementation ("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
-    implementation ("androidx.lifecycle:lifecycle-livedata:2.7.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
 
     // Security - EncryptedSharedPreferences
-    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation ("androidx.security:security-crypto:1.1.0")
     
     // Shimmer effect for skeleton loading
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
     
     // SwipeRefreshLayout for pull-to-refresh
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    
+    // Hilt for Dependency Injection
+    implementation(libs.hilt.android)
+    annotationProcessor(libs.hilt.compiler)
 }

@@ -14,6 +14,9 @@ import com.example.filmspace_mobile.ui.main.SearchFragment.SearchFragment;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.databinding.ActivityMainBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
 

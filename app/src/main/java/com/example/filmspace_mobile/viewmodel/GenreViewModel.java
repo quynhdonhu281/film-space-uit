@@ -1,33 +1,33 @@
 package com.example.filmspace_mobile.viewmodel;
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.model.movie.Genre;
+import com.example.filmspace_mobile.data.repository.GenreRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.inject.Inject;
 
-public class GenreViewModel extends AndroidViewModel {
-    private final ApiService apiService;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
+public class GenreViewModel extends ViewModel {
+    private static final String TAG = "GenreViewModel";
+    
+    private final GenreRepository genreRepository;
 
     // Genres
     private final MutableLiveData<List<Genre>> genresLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> genresErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> genresLoadingLiveData = new MutableLiveData<>();
 
-    public GenreViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
+    @Inject
+    public GenreViewModel(GenreRepository genreRepository) {
+        this.genreRepository = genreRepository;
     }
 
     // Getters for LiveData
@@ -38,21 +38,17 @@ public class GenreViewModel extends AndroidViewModel {
     // Fetch all genres
     public void fetchGenres() {
         genresLoadingLiveData.setValue(true);
-        apiService.getAllGenres().enqueue(new Callback<List<Genre>>() {
+        genreRepository.getAllGenres(new RepositoryCallback<List<Genre>>() {
             @Override
-            public void onResponse(Call<List<Genre>> call, Response<List<Genre>> response) {
+            public void onSuccess(List<Genre> genres) {
                 genresLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    genresLiveData.setValue(response.body());
-                } else {
-                    genresErrorLiveData.setValue("Failed to load genres");
-                }
+                genresLiveData.setValue(genres);
             }
 
             @Override
-            public void onFailure(Call<List<Genre>> call, Throwable t) {
+            public void onError(String errorMessage) {
                 genresLoadingLiveData.setValue(false);
-                genresErrorLiveData.setValue("Error: " + t.getMessage());
+                genresErrorLiveData.setValue(errorMessage);
             }
         });
     }

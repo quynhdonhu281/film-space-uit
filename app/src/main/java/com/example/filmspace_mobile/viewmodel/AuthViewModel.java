@@ -1,44 +1,26 @@
 package com.example.filmspace_mobile.viewmodel;
 
-import android.app.Application;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.BuildConfig;
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
-import com.example.filmspace_mobile.data.model.auth.ForgotPasswordRequest;
-import com.example.filmspace_mobile.data.model.auth.ForgotPasswordResponse;
-import com.example.filmspace_mobile.data.model.auth.LoginRequest;
 import com.example.filmspace_mobile.data.model.auth.LoginResponse;
-import com.example.filmspace_mobile.data.model.auth.RegisterRequest;
 import com.example.filmspace_mobile.data.model.auth.RegisterResponse;
-import com.example.filmspace_mobile.data.model.auth.ResendOTPRequest;
-import com.example.filmspace_mobile.data.model.auth.ResendOTPResponse;
-import com.example.filmspace_mobile.data.model.auth.ResetPasswordRequest;
 import com.example.filmspace_mobile.data.model.auth.ResetPasswordResponse;
-import com.example.filmspace_mobile.data.model.auth.VerifyOTPRequest;
 import com.example.filmspace_mobile.data.model.auth.VerifyOTPResponse;
-import com.google.gson.Gson;
+import com.example.filmspace_mobile.data.repository.AuthRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import javax.inject.Inject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-public class AuthViewModel extends AndroidViewModel {
+@HiltViewModel
+public class AuthViewModel extends ViewModel {
     private static final String TAG = "AuthViewModel";
 
-    private final ApiService apiService;
-    private final UserSessionManager sessionManager;
+    private final AuthRepository authRepository;
 
     // Login
     private final MutableLiveData<LoginResponse> loginResponseLiveData = new MutableLiveData<>();
@@ -70,10 +52,9 @@ public class AuthViewModel extends AndroidViewModel {
     private final MutableLiveData<String> resetPasswordErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> resetPasswordLoadingLiveData = new MutableLiveData<>();
 
-    public AuthViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
-        sessionManager = new UserSessionManager(application.getApplicationContext());
+    @Inject
+    public AuthViewModel(AuthRepository authRepository) {
+        this.authRepository = authRepository;
     }
 
     // Getters for LiveData
@@ -103,69 +84,23 @@ public class AuthViewModel extends AndroidViewModel {
 
     // Session Manager
     public UserSessionManager getSessionManager() {
-        return sessionManager;
+        return authRepository.getSessionManager();
     }
 
     // Login
     public void login(String email, String password) {
         loginLoadingLiveData.setValue(true);
-        LoginRequest request = new LoginRequest(email, password);
-
-        apiService.login(request).enqueue(new Callback<LoginResponse>() {
+        authRepository.login(email, password, new RepositoryCallback<LoginResponse>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onSuccess(LoginResponse data) {
                 loginLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse loginResponse = response.body();
-                    // Save session
-                    sessionManager.saveUserSession(
-                            loginResponse.getUserId(),
-                            loginResponse.getUsername(),
-                            loginResponse.getEmail(),
-                            loginResponse.getAvatarUrl(),
-                            loginResponse.getName(),
-                            loginResponse.getToken()
-                    );
-                    loginResponseLiveData.setValue(loginResponse);
-                } else {
-                    String errorMsg;
-                    switch (response.code()) {
-                        case 401:
-                            errorMsg = "Invalid email or password";
-                            break;
-                        case 403:
-                            errorMsg = "Account is disabled. Contact support.";
-                            break;
-                        case 404:
-                            errorMsg = "Service unavailable. Try again later.";
-                            break;
-                        case 500:
-                        case 502:
-                        case 503:
-                            errorMsg = "Server error. Please try again later.";
-                            break;
-                        default:
-                            errorMsg = "Unable to sign in. Please try again.";
-                    }
-                    loginErrorLiveData.setValue(errorMsg);
-                }
+                loginResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onError(String error) {
                 loginLoadingLiveData.setValue(false);
-                String errorMsg;
-                if (t instanceof UnknownHostException || t instanceof IOException) {
-                    errorMsg = "No internet connection. Please check your network.";
-                } else if (t instanceof SocketTimeoutException) {
-                    errorMsg = "Request timed out. Please try again.";
-                } else {
-                    errorMsg = "Something went wrong. Please try again later.";
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Login failed", t);
-                    }
-                }
-                loginErrorLiveData.setValue(errorMsg);
+                loginErrorLiveData.setValue(error);
             }
         });
     }
@@ -173,63 +108,17 @@ public class AuthViewModel extends AndroidViewModel {
     // Register
     public void register(String email, String password, String username, String fullname) {
         registerLoadingLiveData.setValue(true);
-        RegisterRequest request = new RegisterRequest(email, password, username, fullname);
-
-        apiService.register(request).enqueue(new Callback<RegisterResponse>() {
+        authRepository.register(email, password, username, fullname, new RepositoryCallback<RegisterResponse>() {
             @Override
-            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+            public void onSuccess(RegisterResponse data) {
                 registerLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    registerResponseLiveData.setValue(response.body());
-                } else {
-                    String errorMessage = "Registration failed";
-                    try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            if (BuildConfig.DEBUG) {
-                                Log.e(TAG, "Register error body: " + errorBody);
-                            }
-                            
-                            // Try to parse as JSON to extract message
-                            if (errorBody.contains("message")) {
-                                Gson gson = new Gson();
-                                ErrorResponse errorResponse = gson.fromJson(errorBody, ErrorResponse.class);
-                                if (errorResponse != null && errorResponse.message != null) {
-                                    errorMessage = errorResponse.message;
-                                }
-                            } else if (response.code() == 409) {
-                                errorMessage = "Email or username already exists";
-                            } else {
-                                errorMessage = "Registration failed. Please try again.";
-                            }
-                        } else {
-                            errorMessage = response.code() == 409 ? "Email or username already exists" : "Registration failed. Please try again.";
-                        }
-                    } catch (IOException e) {
-                        if (BuildConfig.DEBUG) {
-                            Log.e(TAG, "Error reading error body", e);
-                        }
-                        errorMessage = "Registration failed. Please try again.";
-                    }
-                    registerErrorLiveData.setValue(errorMessage);
-                }
+                registerResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+            public void onError(String error) {
                 registerLoadingLiveData.setValue(false);
-                String errorMsg;
-                if (t instanceof UnknownHostException || t instanceof IOException) {
-                    errorMsg = "No internet connection. Please check your network.";
-                } else if (t instanceof SocketTimeoutException) {
-                    errorMsg = "Request timed out. Please try again.";
-                } else {
-                    errorMsg = "Something went wrong. Please try again later.";
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Registration failed", t);
-                    }
-                }
-                registerErrorLiveData.setValue(errorMsg);
+                registerErrorLiveData.setValue(error);
             }
         });
     }
@@ -237,57 +126,17 @@ public class AuthViewModel extends AndroidViewModel {
     // Verify OTP
     public void verifyOTP(String email, String otp) {
         verifyOTPLoadingLiveData.setValue(true);
-        VerifyOTPRequest request = new VerifyOTPRequest(email, otp);
-
-        apiService.verifyOtp(request).enqueue(new Callback<VerifyOTPResponse>() {
+        authRepository.verifyOTP(email, otp, new RepositoryCallback<VerifyOTPResponse>() {
             @Override
-            public void onResponse(Call<VerifyOTPResponse> call, Response<VerifyOTPResponse> response) {
+            public void onSuccess(VerifyOTPResponse data) {
                 verifyOTPLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    VerifyOTPResponse verifyResponse = response.body();
-                    // Save session
-                    sessionManager.saveUserSession(
-                            verifyResponse.getUserId(),
-                            verifyResponse.getUsername(),
-                            verifyResponse.getEmail(),
-                            verifyResponse.getAvatarUrl(),
-                            verifyResponse.getName(),
-                            verifyResponse.getToken()
-                    );
-                    verifyOTPResponseLiveData.setValue(verifyResponse);
-                } else {
-                    String errorMessage = response.code() == 401 || response.code() == 400 
-                        ? "Invalid or expired OTP. Please try again." 
-                        : "OTP verification failed. Please try again.";
-                    try {
-                        if (response.errorBody() != null && BuildConfig.DEBUG) {
-                            String errorBody = response.errorBody().string();
-                            Log.e(TAG, "Error body: " + errorBody);
-                        }
-                    } catch (IOException e) {
-                        if (BuildConfig.DEBUG) {
-                            Log.e(TAG, "Error reading error body", e);
-                        }
-                    }
-                    verifyOTPErrorLiveData.setValue(errorMessage);
-                }
+                verifyOTPResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<VerifyOTPResponse> call, Throwable t) {
+            public void onError(String error) {
                 verifyOTPLoadingLiveData.setValue(false);
-                String errorMsg;
-                if (t instanceof UnknownHostException || t instanceof IOException) {
-                    errorMsg = "No internet connection. Please check your network.";
-                } else if (t instanceof SocketTimeoutException) {
-                    errorMsg = "Request timed out. Please try again.";
-                } else {
-                    errorMsg = "Something went wrong. Please try again later.";
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "OTP verification failed", t);
-                    }
-                }
-                verifyOTPErrorLiveData.setValue(errorMsg);
+                verifyOTPErrorLiveData.setValue(error);
             }
         });
     }
@@ -295,27 +144,17 @@ public class AuthViewModel extends AndroidViewModel {
     // Resend OTP
     public void resendOTP(String email) {
         resendOTPLoadingLiveData.setValue(true);
-        ResendOTPRequest request = new ResendOTPRequest(email);
-
-        apiService.resendOtp(request).enqueue(new Callback<ResendOTPResponse>() {
+        authRepository.resendOTP(email, new RepositoryCallback<String>() {
             @Override
-            public void onResponse(Call<ResendOTPResponse> call, Response<ResendOTPResponse> response) {
+            public void onSuccess(String data) {
                 resendOTPLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    String message = response.body().getMessage();
-                    resendOTPResponseLiveData.setValue(message != null ? message : "OTP resent successfully");
-                } else {
-                    resendOTPErrorLiveData.setValue("Failed to resend OTP. Please try again.");
-                }
+                resendOTPResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ResendOTPResponse> call, Throwable t) {
+            public void onError(String error) {
                 resendOTPLoadingLiveData.setValue(false);
-                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
-                    ? "No internet connection. Please check your network." 
-                    : "Failed to resend OTP. Please try again.";
-                resendOTPErrorLiveData.setValue(errorMsg);
+                resendOTPErrorLiveData.setValue(error);
             }
         });
     }
@@ -323,29 +162,17 @@ public class AuthViewModel extends AndroidViewModel {
     // Forgot Password
     public void forgotPassword(String email) {
         forgotPasswordLoadingLiveData.setValue(true);
-        ForgotPasswordRequest request = new ForgotPasswordRequest(email);
-
-        apiService.forgotPassword(request).enqueue(new Callback<ForgotPasswordResponse>() {
+        authRepository.forgotPassword(email, new RepositoryCallback<String>() {
             @Override
-            public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
+            public void onSuccess(String data) {
                 forgotPasswordLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    String message = response.body().getMessage();
-                    forgotPasswordResponseLiveData.setValue(message != null ? message : "OTP sent successfully");
-                } else {
-                    forgotPasswordErrorLiveData.setValue(response.code() == 404 
-                        ? "Email not found. Please check your email." 
-                        : "Failed to send OTP. Please try again.");
-                }
+                forgotPasswordResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
+            public void onError(String error) {
                 forgotPasswordLoadingLiveData.setValue(false);
-                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
-                    ? "No internet connection. Please check your network." 
-                    : "Failed to send OTP. Please try again.";
-                forgotPasswordErrorLiveData.setValue(errorMsg);
+                forgotPasswordErrorLiveData.setValue(error);
             }
         });
     }
@@ -353,36 +180,18 @@ public class AuthViewModel extends AndroidViewModel {
     // Reset Password
     public void resetPassword(String email, String otp, String newPassword) {
         resetPasswordLoadingLiveData.setValue(true);
-        ResetPasswordRequest request = new ResetPasswordRequest(email, otp, newPassword);
-
-        apiService.resetPassword(request).enqueue(new Callback<ResetPasswordResponse>() {
+        authRepository.resetPassword(email, otp, newPassword, new RepositoryCallback<ResetPasswordResponse>() {
             @Override
-            public void onResponse(Call<ResetPasswordResponse> call, Response<ResetPasswordResponse> response) {
+            public void onSuccess(ResetPasswordResponse data) {
                 resetPasswordLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    resetPasswordResponseLiveData.setValue(response.body());
-                } else {
-                    String errorMsg = response.code() == 401 || response.code() == 400 
-                        ? "Invalid or expired OTP. Please try again." 
-                        : "Failed to reset password. Please try again.";
-                    resetPasswordErrorLiveData.setValue(errorMsg);
-                }
+                resetPasswordResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ResetPasswordResponse> call, Throwable t) {
+            public void onError(String error) {
                 resetPasswordLoadingLiveData.setValue(false);
-                String errorMsg = (t instanceof UnknownHostException || t instanceof IOException) 
-                    ? "No internet connection. Please check your network." 
-                    : "Failed to reset password. Please try again.";
-                resetPasswordErrorLiveData.setValue(errorMsg);
+                resetPasswordErrorLiveData.setValue(error);
             }
         });
-    }
-
-    // Helper class for error response parsing
-    private static class ErrorResponse {
-        String message;
-        String error;
     }
 }

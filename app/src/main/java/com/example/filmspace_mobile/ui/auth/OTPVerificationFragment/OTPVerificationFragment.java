@@ -23,6 +23,9 @@ import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.example.filmspace_mobile.ui.main.MainActivity;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class OTPVerificationFragment extends Fragment {
 
     private String userEmail;

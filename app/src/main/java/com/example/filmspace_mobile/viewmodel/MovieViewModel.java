@@ -1,24 +1,24 @@
 package com.example.filmspace_mobile.viewmodel;
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.repository.MovieRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.inject.Inject;
 
-public class MovieViewModel extends AndroidViewModel {
-    private final ApiService apiService;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
+public class MovieViewModel extends ViewModel {
+    private static final String TAG = "MovieViewModel";
+    
+    private final MovieRepository movieRepository;
 
     // Movies
     private final MutableLiveData<List<Movie>> allMoviesLiveData = new MutableLiveData<>();
@@ -30,9 +30,9 @@ public class MovieViewModel extends AndroidViewModel {
     private final MutableLiveData<String> moviesByGenreErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> moviesByGenreLoadingLiveData = new MutableLiveData<>();
 
-    public MovieViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
+    @Inject
+    public MovieViewModel(MovieRepository movieRepository) {
+        this.movieRepository = movieRepository;
     }
 
     // Getters for LiveData
@@ -47,21 +47,17 @@ public class MovieViewModel extends AndroidViewModel {
     // Fetch all movies
     public void fetchAllMovies() {
         moviesLoadingLiveData.setValue(true);
-        apiService.getAllMovies().enqueue(new Callback<List<Movie>>() {
+        movieRepository.getAllMovies(new RepositoryCallback<List<Movie>>() {
             @Override
-            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+            public void onSuccess(List<Movie> movies) {
                 moviesLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    allMoviesLiveData.setValue(response.body());
-                } else {
-                    moviesErrorLiveData.setValue("Failed to load movies");
-                }
+                allMoviesLiveData.setValue(movies);
             }
 
             @Override
-            public void onFailure(Call<List<Movie>> call, Throwable t) {
+            public void onError(String errorMessage) {
                 moviesLoadingLiveData.setValue(false);
-                moviesErrorLiveData.setValue("Error: " + t.getMessage());
+                moviesErrorLiveData.setValue(errorMessage);
             }
         });
     }
@@ -69,21 +65,17 @@ public class MovieViewModel extends AndroidViewModel {
     // Fetch movies by genre
     public void fetchMoviesByGenre(int genreId) {
         moviesByGenreLoadingLiveData.setValue(true);
-        apiService.getMoviesByGenre(genreId).enqueue(new Callback<List<Movie>>() {
+        movieRepository.getMoviesByGenre(genreId, new RepositoryCallback<List<Movie>>() {
             @Override
-            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+            public void onSuccess(List<Movie> movies) {
                 moviesByGenreLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    moviesByGenreLiveData.setValue(response.body());
-                } else {
-                    moviesByGenreErrorLiveData.setValue("Failed to load movies");
-                }
+                moviesByGenreLiveData.setValue(movies);
             }
 
             @Override
-            public void onFailure(Call<List<Movie>> call, Throwable t) {
+            public void onError(String errorMessage) {
                 moviesByGenreLoadingLiveData.setValue(false);
-                moviesByGenreErrorLiveData.setValue("Error: " + t.getMessage());
+                moviesByGenreErrorLiveData.setValue(errorMessage);
             }
         });
     }

@@ -1,4 +1,4 @@
-package com.example.filmspace_mobile.Adapter;
+package com.example.filmspace_mobile.ui.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

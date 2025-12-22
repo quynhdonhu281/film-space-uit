@@ -19,6 +19,9 @@ import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ForgotPasswordFragment extends Fragment {
 
     private AuthViewModel authViewModel;

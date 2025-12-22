@@ -28,6 +28,7 @@ public class RetrofitClient {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
                 .addInterceptor(new AuthInterceptor(com.example.filmspace_mobile.FilmSpaceApplication.getInstance()));
 
         // Only add logging interceptor in debug builds

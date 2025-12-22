@@ -21,9 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.filmspace_mobile.Adapter.GenreAdapter;
-import com.example.filmspace_mobile.Adapter.MovieAdapter;
-import com.example.filmspace_mobile.Adapter.MovieSliderAdapter;
+import com.example.filmspace_mobile.ui.adapters.GenreAdapter;
+import com.example.filmspace_mobile.ui.adapters.MovieAdapter;
+import com.example.filmspace_mobile.ui.adapters.MovieSliderAdapter;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.databinding.FragmentHomeBinding;
 import com.example.filmspace_mobile.ui.movie.MovieDetailActivity;
@@ -31,6 +31,9 @@ import com.example.filmspace_mobile.ui.movie.MoviesByGenreActivity;
 import com.example.filmspace_mobile.viewmodel.GenreViewModel;
 import com.example.filmspace_mobile.viewmodel.MovieViewModel;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class HomeFragment extends Fragment {
     private MovieViewModel movieViewModel;
     private GenreViewModel genreViewModel;
