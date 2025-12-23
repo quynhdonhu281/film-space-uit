@@ -29,9 +29,6 @@
             android:exported="false"
             android:theme="@style/Theme.FilmSpace_Mobile" />
         <activity
-            android:name=".DetailActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.movie.MovieDetailActivity"
             android:exported="false" />
         <activity

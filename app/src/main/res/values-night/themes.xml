@@ -3,5 +3,9 @@
     <style name="Base.Theme.FilmSpace_Mobile" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        
+        <!-- Set Mulish as default font -->
+        <item name="android:fontFamily">@font/mulish</item>
+        <item name="fontFamily">@font/mulish</item>
     </style>
 </resources>

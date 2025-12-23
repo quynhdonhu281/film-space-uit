@@ -115,7 +115,8 @@
             android:paddingRight="32dp"
             android:paddingBottom="14dp"
             android:text="Continue"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:backgroundTint="@color/color_main"/>
 
         <TextView
             android:id="@+id/forgotPasswordTextView"
@@ -125,7 +126,7 @@
             android:layout_marginBottom="10dp"
             android:gravity="center_horizontal"
             android:text="Forgot Password?"
-            android:textColor="#685CF0" />
+            android:textColor="@color/color_main"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -199,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="Sign up"
-                android:textColor="#685CF0" />
+                android:textColor="@color/color_main" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

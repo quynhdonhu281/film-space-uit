@@ -56,8 +56,8 @@ public class SignInFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize ViewModel
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        // Initialize ViewModel with Hilt
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
         // Initialize views
         emailInput = view.findViewById(R.id.emailTextInput);
@@ -134,6 +134,12 @@ public class SignInFragment extends Fragment {
         // Validate password
         if (TextUtils.isEmpty(password)) {
             passwordInput.setError("Password is required");
+            passwordInput.requestFocus();
+            return;
+        }
+
+        if (password.length() < 8) {
+            passwordInput.setError("Password must be at least 8 characters");
             passwordInput.requestFocus();
             return;
         }

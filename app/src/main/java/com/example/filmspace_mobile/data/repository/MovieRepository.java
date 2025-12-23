@@ -3,6 +3,7 @@ package com.example.filmspace_mobile.data.repository;
 import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.data.api.ApiService;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.RecommendationsResponse;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -69,6 +70,31 @@ public class MovieRepository {
 
             @Override
             public void onFailure(Call<List<Movie>> call, Throwable t) {
+                String errorMessage = getNetworkErrorMessage(t);
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Fetch recommended movies for the user
+     * @param limit The number of recommendations to fetch
+     * @param callback Callback to handle success or failure
+     */
+    public void getRecommendedMovies(int limit, RepositoryCallback<List<Movie>> callback) {
+        apiService.getRecommendedMovies(limit).enqueue(new Callback<RecommendationsResponse>() {
+            @Override
+            public void onResponse(Call<RecommendationsResponse> call, Response<RecommendationsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    String errorMessage = getHttpErrorMessage(response.code());
+                    callback.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RecommendationsResponse> call, Throwable t) {
                 String errorMessage = getNetworkErrorMessage(t);
                 callback.onError(errorMessage);
             }

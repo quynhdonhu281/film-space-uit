@@ -225,7 +225,8 @@
                     android:paddingRight="32dp"
                     android:paddingBottom="14dp"
                     android:text="Continue"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:backgroundTint="@color/color_main"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -299,7 +300,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:text="Sign in"
-                        android:textColor="#685CF0" />
+                        android:textColor="@color/color_main" />
                 </LinearLayout>
             </LinearLayout>
 

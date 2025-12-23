@@ -1,31 +1,22 @@
 package com.example.filmspace_mobile.ui.auth.OTPVerificationFragment;
 
-import android.app.Application;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.BuildConfig;
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
-import com.example.filmspace_mobile.data.model.auth.ResendOTPRequest;
-import com.example.filmspace_mobile.data.model.auth.ResendOTPResponse;
-import com.example.filmspace_mobile.data.model.auth.VerifyOTPRequest;
 import com.example.filmspace_mobile.data.model.auth.VerifyOTPResponse;
+import com.example.filmspace_mobile.data.repository.AuthRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
-import java.io.IOException;
+import javax.inject.Inject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-public class OTPVerificationViewModel extends AndroidViewModel {
+@HiltViewModel
+public class OTPVerificationViewModel extends ViewModel {
     private static final String TAG = "OTPVerificationViewModel";
-    private final ApiService apiService;
+    private final AuthRepository authRepository;
     private final UserSessionManager sessionManager;
 
     private final MutableLiveData<VerifyOTPResponse> verifyOTPResponseLiveData = new MutableLiveData<>();
@@ -36,10 +27,10 @@ public class OTPVerificationViewModel extends AndroidViewModel {
     private final MutableLiveData<String> resendOTPErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> resendOTPLoadingLiveData = new MutableLiveData<>();
 
-    public OTPVerificationViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
-        sessionManager = new UserSessionManager(application.getApplicationContext());
+    @Inject
+    public OTPVerificationViewModel(AuthRepository authRepository, UserSessionManager sessionManager) {
+        this.authRepository = authRepository;
+        this.sessionManager = sessionManager;
     }
 
     public LiveData<VerifyOTPResponse> getVerifyOTPResponse() { return verifyOTPResponseLiveData; }
@@ -54,70 +45,36 @@ public class OTPVerificationViewModel extends AndroidViewModel {
 
     public void verifyOTP(String email, String otp) {
         verifyOTPLoadingLiveData.setValue(true);
-        VerifyOTPRequest request = new VerifyOTPRequest(email, otp);
 
-        apiService.verifyOtp(request).enqueue(new Callback<VerifyOTPResponse>() {
+        authRepository.verifyOTP(email, otp, new RepositoryCallback<VerifyOTPResponse>() {
             @Override
-            public void onResponse(Call<VerifyOTPResponse> call, Response<VerifyOTPResponse> response) {
+            public void onSuccess(VerifyOTPResponse data) {
                 verifyOTPLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    VerifyOTPResponse verifyResponse = response.body();
-                    sessionManager.saveUserSession(
-                            verifyResponse.getUserId(),
-                            verifyResponse.getUsername(),
-                            verifyResponse.getEmail(),
-                            verifyResponse.getAvatarUrl(),
-                            verifyResponse.getName(),
-                            verifyResponse.getToken()
-                    );
-                    verifyOTPResponseLiveData.setValue(verifyResponse);
-                } else {
-                    String errorMessage = "OTP verification failed";
-                    try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            if (BuildConfig.DEBUG) {
-                                Log.e(TAG, "Error body: " + errorBody);
-                            }
-                            errorMessage = "Invalid or expired OTP. Please try again.";
-                        }
-                    } catch (IOException e) {
-                        if (BuildConfig.DEBUG) {
-                            Log.e(TAG, "Error reading error body", e);
-                        }
-                    }
-                    verifyOTPErrorLiveData.setValue(errorMessage);
-                }
+                verifyOTPResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<VerifyOTPResponse> call, Throwable t) {
+            public void onError(String error) {
                 verifyOTPLoadingLiveData.setValue(false);
-                verifyOTPErrorLiveData.setValue("Error: " + t.getMessage());
+                verifyOTPErrorLiveData.setValue(error);
             }
         });
     }
 
     public void resendOTP(String email) {
         resendOTPLoadingLiveData.setValue(true);
-        ResendOTPRequest request = new ResendOTPRequest(email);
 
-        apiService.resendOtp(request).enqueue(new Callback<ResendOTPResponse>() {
+        authRepository.resendOTP(email, new RepositoryCallback<String>() {
             @Override
-            public void onResponse(Call<ResendOTPResponse> call, Response<ResendOTPResponse> response) {
+            public void onSuccess(String data) {
                 resendOTPLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    String message = response.body().getMessage();
-                    resendOTPResponseLiveData.setValue(message != null ? message : "OTP resent successfully");
-                } else {
-                    resendOTPErrorLiveData.setValue("Failed to resend OTP");
-                }
+                resendOTPResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ResendOTPResponse> call, Throwable t) {
+            public void onError(String error) {
                 resendOTPLoadingLiveData.setValue(false);
-                resendOTPErrorLiveData.setValue("Error: " + t.getMessage());
+                resendOTPErrorLiveData.setValue(error);
             }
         });
     }

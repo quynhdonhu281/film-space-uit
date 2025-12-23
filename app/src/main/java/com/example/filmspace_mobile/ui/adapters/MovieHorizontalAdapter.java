@@ -20,7 +20,7 @@ import com.example.filmspace_mobile.data.model.movie.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
+public class MovieHorizontalAdapter extends RecyclerView.Adapter<MovieHorizontalAdapter.ViewHolder> {
     private List<Movie> movies = new ArrayList<>();
     private Context context;
     private OnMovieClickListener listener;
@@ -29,7 +29,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         void onMovieClick(Movie movie);
     }
 
-    public MovieAdapter(OnMovieClickListener listener) {
+    public MovieHorizontalAdapter(OnMovieClickListener listener) {
         this.listener = listener;
     }
 
@@ -42,7 +42,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
-        View view = LayoutInflater.from(context).inflate(R.layout.viewholder_film, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.viewholder_film_horizontal, parent, false);
         return new ViewHolder(view);
     }
 
@@ -65,7 +65,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         }
 
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(30));
+        requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(20));
 
         Glide.with(context)
                 .load(movie.getPosterUrl())
@@ -74,7 +74,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
                 .error(R.drawable.movie_poster_placeholder)
                 .into(holder.pic);
 
+        // Click on entire card
         holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onMovieClick(movie);
+            }
+        });
+
+        // Click on play button
+        holder.playButton.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onMovieClick(movie);
             }
@@ -90,12 +98,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         TextView title;
         TextView genres;
         ImageView pic;
+        ImageView playButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.filmTitle);
             genres = itemView.findViewById(R.id.filmGenres);
             pic = itemView.findViewById(R.id.pic);
+            playButton = itemView.findViewById(R.id.playButton);
         }
     }
 }
