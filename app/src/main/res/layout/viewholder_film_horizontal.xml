@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Movie Poster -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/posterCard"
+            android:layout_width="70dp"
+            android:layout_height="105dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/pic"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Movie Info Container -->
+        <LinearLayout
+            android:id="@+id/movieInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintStart_toEndOf="@id/posterCard"
+            app:layout_constraintEnd_toStartOf="@id/playButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Movie Title -->
+            <TextView
+                android:id="@+id/filmTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Movie Title"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <!-- Movie Genres -->
+            <TextView
+                android:id="@+id/filmGenres"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Action, Adventure"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+        </LinearLayout>
+
+        <!-- Play Button -->
+        <ImageView
+            android:id="@+id/playButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_play"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/color_main"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

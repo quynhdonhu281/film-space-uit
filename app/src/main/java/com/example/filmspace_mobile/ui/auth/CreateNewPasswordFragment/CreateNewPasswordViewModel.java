@@ -1,25 +1,20 @@
 package com.example.filmspace_mobile.ui.auth.CreateNewPasswordFragment;
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
-import com.example.filmspace_mobile.data.model.auth.ForgotPasswordRequest;
-import com.example.filmspace_mobile.data.model.auth.ForgotPasswordResponse;
-import com.example.filmspace_mobile.data.model.auth.ResetPasswordRequest;
 import com.example.filmspace_mobile.data.model.auth.ResetPasswordResponse;
+import com.example.filmspace_mobile.data.repository.AuthRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.inject.Inject;
 
-public class CreateNewPasswordViewModel extends AndroidViewModel {
-    private final ApiService apiService;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
+public class CreateNewPasswordViewModel extends ViewModel {
+    private final AuthRepository authRepository;
 
     private final MutableLiveData<String> forgotPasswordResponseLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> forgotPasswordErrorLiveData = new MutableLiveData<>();
@@ -29,9 +24,9 @@ public class CreateNewPasswordViewModel extends AndroidViewModel {
     private final MutableLiveData<String> resetPasswordErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> resetPasswordLoadingLiveData = new MutableLiveData<>();
 
-    public CreateNewPasswordViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
+    @Inject
+    public CreateNewPasswordViewModel(AuthRepository authRepository) {
+        this.authRepository = authRepository;
     }
 
     public LiveData<String> getForgotPasswordResponse() { return forgotPasswordResponseLiveData; }
@@ -44,47 +39,36 @@ public class CreateNewPasswordViewModel extends AndroidViewModel {
 
     public void forgotPassword(String email) {
         forgotPasswordLoadingLiveData.setValue(true);
-        ForgotPasswordRequest request = new ForgotPasswordRequest(email);
 
-        apiService.forgotPassword(request).enqueue(new Callback<ForgotPasswordResponse>() {
+        authRepository.forgotPassword(email, new RepositoryCallback<String>() {
             @Override
-            public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
+            public void onSuccess(String data) {
                 forgotPasswordLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    String message = response.body().getMessage();
-                    forgotPasswordResponseLiveData.setValue(message != null ? message : "OTP sent successfully");
-                } else {
-                    forgotPasswordErrorLiveData.setValue("Failed to send OTP");
-                }
+                forgotPasswordResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
+            public void onError(String error) {
                 forgotPasswordLoadingLiveData.setValue(false);
-                forgotPasswordErrorLiveData.setValue("Error: " + t.getMessage());
+                forgotPasswordErrorLiveData.setValue(error);
             }
         });
     }
 
     public void resetPassword(String email, String otp, String newPassword) {
         resetPasswordLoadingLiveData.setValue(true);
-        ResetPasswordRequest request = new ResetPasswordRequest(email, otp, newPassword);
 
-        apiService.resetPassword(request).enqueue(new Callback<ResetPasswordResponse>() {
+        authRepository.resetPassword(email, otp, newPassword, new RepositoryCallback<ResetPasswordResponse>() {
             @Override
-            public void onResponse(Call<ResetPasswordResponse> call, Response<ResetPasswordResponse> response) {
+            public void onSuccess(ResetPasswordResponse data) {
                 resetPasswordLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    resetPasswordResponseLiveData.setValue(response.body());
-                } else {
-                    resetPasswordErrorLiveData.setValue("Password reset failed: " + response.message());
-                }
+                resetPasswordResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<ResetPasswordResponse> call, Throwable t) {
+            public void onError(String error) {
                 resetPasswordLoadingLiveData.setValue(false);
-                resetPasswordErrorLiveData.setValue("Error: " + t.getMessage());
+                resetPasswordErrorLiveData.setValue(error);
             }
         });
     }

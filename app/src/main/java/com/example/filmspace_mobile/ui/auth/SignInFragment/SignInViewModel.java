@@ -1,34 +1,31 @@
 package com.example.filmspace_mobile.ui.auth.SignInFragment;
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.filmspace_mobile.data.api.ApiService;
-import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
-import com.example.filmspace_mobile.data.model.auth.LoginRequest;
 import com.example.filmspace_mobile.data.model.auth.LoginResponse;
+import com.example.filmspace_mobile.data.repository.AuthRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.inject.Inject;
 
-public class SignInViewModel extends AndroidViewModel {
-    private final ApiService apiService;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
+public class SignInViewModel extends ViewModel {
+    private final AuthRepository authRepository;
     private final UserSessionManager sessionManager;
 
     private final MutableLiveData<LoginResponse> loginResponseLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> loginErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loginLoadingLiveData = new MutableLiveData<>();
 
-    public SignInViewModel(@NonNull Application application) {
-        super(application);
-        apiService = RetrofitClient.getApiService();
-        sessionManager = new UserSessionManager(application.getApplicationContext());
+    @Inject
+    public SignInViewModel(AuthRepository authRepository, UserSessionManager sessionManager) {
+        this.authRepository = authRepository;
+        this.sessionManager = sessionManager;
     }
 
     public LiveData<LoginResponse> getLoginResponse() { return loginResponseLiveData; }
@@ -38,32 +35,18 @@ public class SignInViewModel extends AndroidViewModel {
 
     public void login(String email, String password) {
         loginLoadingLiveData.setValue(true);
-        LoginRequest request = new LoginRequest(email, password);
 
-        apiService.login(request).enqueue(new Callback<LoginResponse>() {
+        authRepository.login(email, password, new RepositoryCallback<LoginResponse>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onSuccess(LoginResponse data) {
                 loginLoadingLiveData.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse loginResponse = response.body();
-                    sessionManager.saveUserSession(
-                            loginResponse.getUserId(),
-                            loginResponse.getUsername(),
-                            loginResponse.getEmail(),
-                            loginResponse.getAvatarUrl(),
-                            loginResponse.getName(),
-                            loginResponse.getToken()
-                    );
-                    loginResponseLiveData.setValue(loginResponse);
-                } else {
-                    loginErrorLiveData.setValue("Login failed: " + response.message());
-                }
+                loginResponseLiveData.setValue(data);
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onError(String error) {
                 loginLoadingLiveData.setValue(false);
-                loginErrorLiveData.setValue("Error: " + t.getMessage());
+                loginErrorLiveData.setValue(error);
             }
         });
     }

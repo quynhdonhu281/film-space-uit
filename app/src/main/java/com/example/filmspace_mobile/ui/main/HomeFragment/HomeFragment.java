@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.filmspace_mobile.ui.adapters.GenreAdapter;
 import com.example.filmspace_mobile.ui.adapters.MovieAdapter;
+import com.example.filmspace_mobile.ui.adapters.MovieHorizontalAdapter;
 import com.example.filmspace_mobile.ui.adapters.MovieSliderAdapter;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.databinding.FragmentHomeBinding;
@@ -41,7 +42,8 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     
     private MovieSliderAdapter sliderAdapter;
-    private MovieAdapter bestMoviesAdapter;
+    private MovieAdapter recommendedMoviesAdapter;
+    private MovieHorizontalAdapter topRatingMoviesAdapter;
     private GenreAdapter genreAdapter;
     private MovieAdapter upcomingMoviesAdapter;
 
@@ -120,26 +122,19 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        // Best Movies
-        binding.bestMoviesRecyclerView.setLayoutManager(
+        // Recommended Movies (horizontal scroll)
+        binding.recommendedMoviesRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
         );
-        bestMoviesAdapter = new MovieAdapter(movie -> openMovieDetail(movie.getId()));
-        binding.bestMoviesRecyclerView.setAdapter(bestMoviesAdapter);
+        recommendedMoviesAdapter = new MovieAdapter(movie -> openMovieDetail(movie.getId()));
+        binding.recommendedMoviesRecyclerView.setAdapter(recommendedMoviesAdapter);
 
-        // Categories/Genres
-        binding.categoryRecyclerView.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+        // Top Rating Movies (vertical scroll with horizontal items)
+        binding.topRatingMoviesRecyclerView.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
         );
-        genreAdapter = new GenreAdapter(genre -> openMoviesByGenre(genre.getId()));
-        binding.categoryRecyclerView.setAdapter(genreAdapter);
-
-        // Upcoming Movies
-        binding.upcomingMoviesRecyclerView.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
-        );
-        upcomingMoviesAdapter = new MovieAdapter(movie -> openMovieDetail(movie.getId()));
-        binding.upcomingMoviesRecyclerView.setAdapter(upcomingMoviesAdapter);
+        topRatingMoviesAdapter = new MovieHorizontalAdapter(movie -> openMovieDetail(movie.getId()));
+        binding.topRatingMoviesRecyclerView.setAdapter(topRatingMoviesAdapter);
     }
 
     private void setupObservers() {
@@ -196,49 +191,51 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        homeViewModel.getBestMovies().observe(getViewLifecycleOwner(), movies -> {
+        // Recommended Movies - show all movies for now
+        homeViewModel.getAllMovies().observe(getViewLifecycleOwner(), movies -> {
             if (movies != null && !movies.isEmpty()) {
-                bestMoviesAdapter.setMovies(movies);
-                binding.bestMoviesRecyclerView.setVisibility(View.VISIBLE);
-            } else {
-                binding.bestMoviesRecyclerView.setVisibility(View.GONE);
+                // Don't set the adapter here anymore, use the recommended API instead
             }
         });
 
-        homeViewModel.getUpcomingMovies().observe(getViewLifecycleOwner(), movies -> {
+        // Recommended Movies from API
+        homeViewModel.getRecommendedMovies().observe(getViewLifecycleOwner(), movies -> {
             if (movies != null && !movies.isEmpty()) {
-                upcomingMoviesAdapter.setMovies(movies);
-                binding.upcomingMoviesRecyclerView.setVisibility(View.VISIBLE);
+                recommendedMoviesAdapter.setMovies(movies);
+                binding.recommendedMoviesRecyclerView.setVisibility(View.VISIBLE);
             } else {
-                binding.upcomingMoviesRecyclerView.setVisibility(View.GONE);
+                binding.recommendedMoviesRecyclerView.setVisibility(View.GONE);
             }
         });
 
-        homeViewModel.getGenres().observe(getViewLifecycleOwner(), genres -> {
-            if (genres != null && !genres.isEmpty()) {
-                genreAdapter.setGenres(genres);
-                binding.categoryRecyclerView.setVisibility(View.VISIBLE);
+        // Top Rating Movies - show top 10 movies sorted by rating
+        homeViewModel.getTopRatingMovies().observe(getViewLifecycleOwner(), movies -> {
+            if (movies != null && !movies.isEmpty()) {
+                topRatingMoviesAdapter.setMovies(movies);
+                binding.topRatingMoviesRecyclerView.setVisibility(View.VISIBLE);
             } else {
-                binding.categoryRecyclerView.setVisibility(View.GONE);
+                binding.topRatingMoviesRecyclerView.setVisibility(View.GONE);
             }
         });
 
         // Observe loading states from HomeViewModel
         homeViewModel.getMoviesLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading != null) {
-                // Use shimmer effect for loading
+                // Show/hide shimmer and RecyclerViews
                 binding.shimmerBestMovies.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                binding.shimmerUpcomingMovies.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                binding.bestMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-                binding.upcomingMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-            }
-        });
-
-        homeViewModel.getGenresLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) {
-                // Use shimmer effect for loading
-                binding.shimmerGenres.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                binding.categoryRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                binding.recommendedMoviesProgressBar.setVisibility(View.GONE);
+                binding.topRatingMoviesProgressBar.setVisibility(View.GONE);
+                binding.recommendedMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                binding.topRatingMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                
+                // Start/stop shimmer animation
+                if (isLoading) {
+                    binding.shimmerBestMovies.shimmerMovies1.startShimmer();
+                    binding.shimmerBestMovies.shimmerMovies2.startShimmer();
+                } else {
+                    binding.shimmerBestMovies.shimmerMovies1.stopShimmer();
+                    binding.shimmerBestMovies.shimmerMovies2.stopShimmer();
+                }
             }
         });
 
@@ -247,17 +244,12 @@ public class HomeFragment extends Fragment {
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
                 binding.shimmerBestMovies.getRoot().setVisibility(View.GONE);
-                binding.shimmerUpcomingMovies.getRoot().setVisibility(View.GONE);
-                binding.bestMoviesRecyclerView.setVisibility(View.VISIBLE);
-                binding.upcomingMoviesRecyclerView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        homeViewModel.getGenresError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                binding.shimmerGenres.getRoot().setVisibility(View.GONE);
-                binding.categoryRecyclerView.setVisibility(View.VISIBLE);
+                binding.shimmerBestMovies.shimmerMovies1.stopShimmer();
+                binding.shimmerBestMovies.shimmerMovies2.stopShimmer();
+                binding.recommendedMoviesProgressBar.setVisibility(View.GONE);
+                binding.topRatingMoviesProgressBar.setVisibility(View.GONE);
+                binding.recommendedMoviesRecyclerView.setVisibility(View.VISIBLE);
+                binding.topRatingMoviesRecyclerView.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -367,6 +359,7 @@ public class HomeFragment extends Fragment {
     private void loadData() {
         movieViewModel.fetchAllMovies();
         genreViewModel.fetchGenres();
+        homeViewModel.loadRecommendedMovies();
     }
 
     private void refreshData() {
@@ -376,6 +369,7 @@ public class HomeFragment extends Fragment {
         // Reload data
         movieViewModel.fetchAllMovies();
         genreViewModel.fetchGenres();
+        homeViewModel.loadRecommendedMovies();
         
         // Hide refresh indicator after a short delay (data will update via observers)
         new Handler(Looper.getMainLooper()).postDelayed(() -> {

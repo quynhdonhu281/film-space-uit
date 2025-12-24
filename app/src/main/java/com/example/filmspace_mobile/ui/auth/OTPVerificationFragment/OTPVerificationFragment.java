@@ -43,6 +43,14 @@ public class OTPVerificationFragment extends Fragment {
         if (getArguments() != null) {
             userEmail = getArguments().getString("email");
         }
+        
+        // Prevent back navigation to avoid duplicate registration
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Do nothing - disable back button
+            }
+        });
     }
 
     @Override
@@ -55,8 +63,8 @@ public class OTPVerificationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        // Initialize ViewModel and SessionManager
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        // Initialize ViewModel with Hilt and SessionManager
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
         sessionManager = new UserSessionManager(requireContext());
         
         // Initialize views
@@ -66,6 +74,12 @@ public class OTPVerificationFragment extends Fragment {
         fourthDigit = view.findViewById(R.id.fourthDigitNumberInput);
         fifthDigit = view.findViewById(R.id.fifthDigitNumberInput);
         sixthDigit = view.findViewById(R.id.sixthDigitNumberInput);
+        
+        // Display user email
+        android.widget.TextView emailTextView = view.findViewById(R.id.textView4);
+        if (userEmail != null && !userEmail.isEmpty()) {
+            emailTextView.setText(userEmail);
+        }
         
         // Auto-focus logic for 6 digits
         setupAutoFocus(firstDigit, null, secondDigit);
@@ -141,14 +155,29 @@ public class OTPVerificationFragment extends Fragment {
             }
         });
         
-        // Resend code
-        view.findViewById(R.id.resendCodeTextView).setOnClickListener(v -> {
+        // Resend code with cooldown
+        android.widget.TextView resendTextView = view.findViewById(R.id.resendCodeTextView);
+        resendTextView.setOnClickListener(v -> {
+            // Disable resend for 60 seconds
+            resendTextView.setEnabled(false);
+            resendTextView.setAlpha(0.5f);
+            
             authViewModel.resendOTP(userEmail);
-        });
+            
+            // Countdown timer
+            new android.os.CountDownTimer(60000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    resendTextView.setText("Resend code (" + millisUntilFinished / 1000 + "s)");
+                }
 
-        // Back button
-        view.findViewById(R.id.imageButton).setOnClickListener(v -> {
-            requireActivity().onBackPressed();
+                @Override
+                public void onFinish() {
+                    resendTextView.setEnabled(true);
+                    resendTextView.setAlpha(1.0f);
+                    resendTextView.setText("Resend code");
+                }
+            }.start();
         });
     }
 

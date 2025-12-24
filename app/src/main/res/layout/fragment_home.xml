@@ -129,24 +129,30 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="80dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="200dp">
+                    android:layout_height="220dp">
 
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/viewPager"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingStart="60dp"
-                        android:paddingEnd="60dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:clipToPadding="false"
+                        android:clipChildren="false"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
@@ -161,7 +167,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="12dp"
-                    android:text="Best Movies"
+                    android:text="Recommended for you"
                     android:textColor="@color/color_main"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -171,7 +177,7 @@
                     android:layout_height="wrap_content">
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/bestMoviesRecyclerView"
+                        android:id="@+id/recommendedMoviesRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         app:layout_constraintStart_toStartOf="parent" />
@@ -186,7 +192,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ProgressBar
-                        android:id="@+id/bestMoviesProgressBar"
+                        android:id="@+id/recommendedMoviesProgressBar"
                         style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -203,38 +209,29 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="12dp"
-                    android:text="Category"
+                    android:text="Top Rating Movies"
                     android:textColor="@color/color_main"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="420dp">
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/categoryRecyclerView"
+                        android:id="@+id/topRatingMoviesRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        app:layout_constraintStart_toStartOf="parent" />
-
-                    <include
-                        android:id="@+id/shimmerGenres"
-                        layout="@layout/shimmer_genres_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ProgressBar
-                        android:id="@+id/categoryProgressBar"
+                        android:id="@+id/topRatingMoviesProgressBar"
                         style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -242,53 +239,6 @@
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
-                    android:text="Upcoming Movies"
-                    android:textColor="@color/color_main"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/upcomingMoviesRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="70dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <include
-                        android:id="@+id/shimmerUpcomingMovies"
-                        layout="@layout/shimmer_movies_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ProgressBar
-                        android:id="@+id/upcomingMoviesProgressBar"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="@+id/upcomingMoviesRecyclerView"
-                        app:layout_constraintStart_toStartOf="@+id/upcomingMoviesRecyclerView"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 

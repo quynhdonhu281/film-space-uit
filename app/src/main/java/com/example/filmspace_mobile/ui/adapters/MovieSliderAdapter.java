@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +47,7 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
     public SliderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
         return new SliderViewHolder(LayoutInflater.from(context).inflate(
-                R.layout.slide_item_container, parent, false
+                R.layout.item_movie_slider, parent, false
         ));
     }
 
@@ -66,20 +68,49 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
 
     public class SliderViewHolder extends RecyclerView.ViewHolder {
         private ImageView imageView;
+        private TextView movieTitle;
+        private TextView movieGenres;
+        private Button detailsButton;
 
         public SliderViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageSlide);
+            movieTitle = itemView.findViewById(R.id.movieTitle);
+            movieGenres = itemView.findViewById(R.id.movieGenres);
+            detailsButton = itemView.findViewById(R.id.detailsButton);
         }
 
         void setImage(Movie movie) {
-            RequestOptions requestOptions = new RequestOptions();
-            requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(60));
-
+            // Load image without additional rounded corners since CardView handles it
             Glide.with(context)
                     .load(movie.getPosterUrl())
-                    .apply(requestOptions)
+                    .apply(new RequestOptions().transform(new CenterCrop()))
+                    .placeholder(R.drawable.movie_poster_placeholder)
+                    .error(R.drawable.movie_poster_placeholder)
                     .into(imageView);
+
+            // Set movie title
+            movieTitle.setText(movie.getTitle());
+
+            // Set genres
+            if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+                StringBuilder genresText = new StringBuilder();
+                for (int i = 0; i < Math.min(3, movie.getGenres().size()); i++) {
+                    if (i > 0) genresText.append(", ");
+                    genresText.append(movie.getGenres().get(i).getName());
+                }
+                movieGenres.setText(genresText.toString());
+                movieGenres.setVisibility(View.VISIBLE);
+            } else {
+                movieGenres.setVisibility(View.GONE);
+            }
+
+            // Set click listeners
+            detailsButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onMovieClick(movie);
+                }
+            });
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

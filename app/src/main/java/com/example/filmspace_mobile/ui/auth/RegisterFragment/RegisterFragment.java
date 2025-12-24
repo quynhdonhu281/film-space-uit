@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -48,14 +49,83 @@ public class RegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize ViewModel
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        // Initialize ViewModel with Hilt
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
         TextInputEditText fullnameInput = view.findViewById(R.id.fullnameTextInput);
         TextInputEditText usernameInput = view.findViewById(R.id.usernameTextInput);
         TextInputEditText emailInput = view.findViewById(R.id.emailTextInput);
         TextInputEditText passwordInput = view.findViewById(R.id.passwordTextInput);
         TextInputEditText confirmPasswordInput = view.findViewById(R.id.confirmPasswordTextInput);
+        
+        // Prevent spaces in username input
+        usernameInput.setFilters(new android.text.InputFilter[] {
+            new android.text.InputFilter() {
+                @Override
+                public CharSequence filter(CharSequence source, int start, int end, android.text.Spanned dest, int dstart, int dend) {
+                    if (source.toString().contains(" ")) {
+                        return source.toString().replace(" ", "");
+                    }
+                    return null;
+                }
+            }
+        });
+        
+        // Add password strength indicator
+        passwordInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String password = s.toString();
+                if (password.isEmpty()) {
+                    passwordInput.setError(null);
+                    return;
+                }
+                
+                // Check password strength
+                boolean hasLength = password.length() >= 8;
+                boolean hasUpper = Pattern.compile("[A-Z]").matcher(password).find();
+                boolean hasLower = Pattern.compile("[a-z]").matcher(password).find();
+                boolean hasSpecial = Pattern.compile("[^a-zA-Z0-9]").matcher(password).find();
+                
+                if (!hasLength || !hasUpper || !hasLower || !hasSpecial) {
+                    StringBuilder hint = new StringBuilder("Weak: Need ");
+                    if (!hasLength) hint.append("8+ chars, ");
+                    if (!hasUpper) hint.append("uppercase, ");
+                    if (!hasLower) hint.append("lowercase, ");
+                    if (!hasSpecial) hint.append("special char, ");
+                    passwordInput.setError(hint.substring(0, hint.length() - 2));
+                } else {
+                    passwordInput.setError(null);
+                }
+            }
+            
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        
+        // Confirm password matching feedback
+        confirmPasswordInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String password = passwordInput.getText().toString();
+                String confirmPassword = s.toString();
+                
+                if (!confirmPassword.isEmpty() && !password.equals(confirmPassword)) {
+                    confirmPasswordInput.setError("Passwords do not match");
+                } else {
+                    confirmPasswordInput.setError(null);
+                }
+            }
+            
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         // Observe register response
         authViewModel.getRegisterResponse().observe(getViewLifecycleOwner(), registerResponse -> {

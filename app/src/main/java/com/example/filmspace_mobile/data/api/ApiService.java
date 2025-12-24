@@ -3,6 +3,7 @@ package com.example.filmspace_mobile.data.api;
 import com.example.filmspace_mobile.data.model.auth.*;
 import com.example.filmspace_mobile.data.model.movie.Genre;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.RecommendationsResponse;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -65,4 +67,7 @@ public interface ApiService {
 
     @GET("api/genres")
     Call<List<Genre>> getAllGenres();
+
+    @GET("api/history/recommendations")
+    Call<RecommendationsResponse> getRecommendedMovies(@Query("limit") int limit);
 }

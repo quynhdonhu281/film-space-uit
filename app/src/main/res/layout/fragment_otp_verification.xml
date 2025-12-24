@@ -160,7 +160,8 @@
             android:paddingRight="32dp"
             android:paddingBottom="14dp"
             android:text="Continue"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:backgroundTint="@color/color_main"/>
 
         <LinearLayout
             android:layout_width="match_parent"
