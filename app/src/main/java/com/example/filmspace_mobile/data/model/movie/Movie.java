@@ -1,31 +1,41 @@
 package com.example.filmspace_mobile.data.model.movie;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 public class Movie {
-    @SerializedName("id")
     private int id;
-    
-    @SerializedName("title")
     private String title;
-    
-    @SerializedName("description")
-    private String description;
-    
-    @SerializedName("releaseYear")
-    private int releaseYear;
-    
-    @SerializedName("posterUrl")
     private String posterUrl;
-    
-    @SerializedName("rating")
-    private int rating;
-    
-    @SerializedName("genres")
-    private List<Genre> genres;
+    private String backdropUrl;
+    private String overview;
+    private String releaseDate;
+    private int seasonCount;
+    private int episodeCount;
+    private String genre;  // Giữ lại cho backward compatibility
+    private List<Genre> genres;  // ĐỔI: từ List<String> thành List<Genre>
+    private double rating;
+    private List<Cast> castList;
 
+    // Constructor rỗng
+    public Movie() {}
+
+    // Constructor đầy đủ
+    public Movie(int id, String title, String posterUrl, String backdropUrl,
+                 String overview, String releaseDate, int seasonCount,
+                 int episodeCount, String genre, double rating) {
+        this.id = id;
+        this.title = title;
+        this.posterUrl = posterUrl;
+        this.backdropUrl = backdropUrl;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.seasonCount = seasonCount;
+        this.episodeCount = episodeCount;
+        this.genre = genre;
+        this.rating = rating;
+    }
+
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -42,22 +52,6 @@ public class Movie {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getReleaseYear() {
-        return releaseYear;
-    }
-
-    public void setReleaseYear(int releaseYear) {
-        this.releaseYear = releaseYear;
-    }
-
     public String getPosterUrl() {
         return posterUrl;
     }
@@ -66,19 +60,76 @@ public class Movie {
         this.posterUrl = posterUrl;
     }
 
-    public int getRating() {
-        return rating;
+    public String getBackdropUrl() {
+        return backdropUrl;
     }
 
-    public void setRating(int rating) {
-        this.rating = rating;
+    public void setBackdropUrl(String backdropUrl) {
+        this.backdropUrl = backdropUrl;
     }
 
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public int getSeasonCount() {
+        return seasonCount;
+    }
+
+    public void setSeasonCount(int seasonCount) {
+        this.seasonCount = seasonCount;
+    }
+
+    public int getEpisodeCount() {
+        return episodeCount;
+    }
+
+    public void setEpisodeCount(int episodeCount) {
+        this.episodeCount = episodeCount;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    // Getter/Setter cho genres (List<Genre>)
     public List<Genre> getGenres() {
         return genres;
     }
 
     public void setGenres(List<Genre> genres) {
         this.genres = genres;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public List<Cast> getCastList() {
+        return castList;
+    }
+
+    public void setCastList(List<Cast> castList) {
+        this.castList = castList;
     }
 }
