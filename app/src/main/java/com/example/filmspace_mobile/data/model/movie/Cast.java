@@ -1,9 +1,13 @@
 package com.example.filmspace_mobile.data.model.movie;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Cast {
     private int id;
     private String name;
     private String character;
+    
+    @SerializedName("avatarUrl")
     private String profileUrl;
 
     // Constructor rỗng

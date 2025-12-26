@@ -18,6 +18,7 @@
         android:theme="@style/Theme.FilmSpace_Mobile"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <!-- ==================== SETTING (TEST LAUNCHER) ==================== -->
         <activity
             android:name=".ui.setting.SettingActivity"
             android:exported="true"
@@ -60,6 +61,47 @@
 
         <activity
             android:name=".ui.setting.LanguageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== MAIN (Disabled for testing) ==================== -->
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== TEST LAUNCHER - Direct Movie Detail (Disabled) ==================== -->
+        <activity
+            android:name=".ui.movie.TestMovieDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== SPLASH (OPTIONAL) ==================== -->
+        <activity
+            android:name=".ui.splash.SplashActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== ONBOARDING (OPTIONAL) ==================== -->
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== AUTH ==================== -->
+        <activity
+            android:name=".ui.auth.AuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== MOVIE DETAILS ==================== -->
+        <activity
+            android:name=".ui.movie.MovieDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <activity
+            android:name=".ui.movie.MoviesByGenreActivity"
             android:exported="false"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 

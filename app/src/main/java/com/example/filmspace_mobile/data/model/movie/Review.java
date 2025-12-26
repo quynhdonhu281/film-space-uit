@@ -1,20 +1,28 @@
 package com.example.filmspace_mobile.data.model.movie;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Review {
     private int id;
+    private int movieId;
+    private int userId;
     private String userName;
     private String userAvatar;
     private float rating;
     private String comment;
+    
+    @SerializedName("createdAt")
     private String date;
 
     // Constructor rỗng
     public Review() {}
 
     // Constructor đầy đủ
-    public Review(int id, String userName, String userAvatar, float rating,
-                  String comment, String date) {
+    public Review(int id, int movieId, int userId, String userName, String userAvatar, 
+                  float rating, String comment, String date) {
         this.id = id;
+        this.movieId = movieId;
+        this.userId = userId;
         this.userName = userName;
         this.userAvatar = userAvatar;
         this.rating = rating;
@@ -69,5 +77,21 @@ public class Review {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

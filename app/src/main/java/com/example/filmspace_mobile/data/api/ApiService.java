@@ -48,7 +48,9 @@ public interface ApiService {
     @PUT("api/users/{userId}")
     Call<UserResponse> updateUser(
             @Path("userId") int userId,
+            @Part("username") RequestBody username,
             @Part("name") RequestBody name,
+            @Part("email") RequestBody email,
             @Part MultipartBody.Part avatar
     );
 
@@ -61,6 +63,9 @@ public interface ApiService {
     // Movie endpoints
     @GET("api/Movies")
     Call<List<Movie>> getAllMovies();
+
+    @GET("api/Movies/{id}")
+    Call<Movie> getMovieById(@Path("id") int movieId);
 
     @GET("api/Movies/genre/{id}")
     Call<List<Movie>> getMoviesByGenre(@Path("id") int genreId);

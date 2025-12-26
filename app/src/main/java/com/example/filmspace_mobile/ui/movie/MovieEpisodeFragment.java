@@ -61,46 +61,20 @@ public class MovieEpisodeFragment extends Fragment {
     }
 
     private void loadEpisodes() {
-        // TODO: Load from API
-        // For now, load dummy data
-        List<Episode> dummyEpisodes = new ArrayList<>();
-
-        dummyEpisodes.add(new Episode(
-                1, 1,
-                "The Vanishing of Will Byers",
-                "On his way home from a friend's house, young Will sees something terrifying. Nearby, a sinister secret lurks in the depths of a government lab.",
-                "",
-                49,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                2, 2,
-                "The Weirdo on Maple Street",
-                "Lucas, Mike, and Dustin try to talk to the girl found in the woods. Hopper questions an anxious Joyce about an unsettling phone call.",
-                "",
-                56,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                3, 3,
-                "Holly, Jolly",
-                "An increasingly concerned Nancy looks for Barb and finds out what Jonathan's been up to. Joyce is convinced Will is trying to talk to her.",
-                "",
-                52,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                4, 4,
-                "The Body",
-                "Refusing to believe Will is dead, Joyce tries to connect with her son. The boys give Eleven a makeover. Nancy and Jonathan form an unlikely alliance.",
-                "",
-                50,
-                "2016-07-15"
-        ));
-
-        episodeAdapter.updateData(dummyEpisodes);
+        // Get movie from parent activity
+        MovieDetailActivity activity = (MovieDetailActivity) getActivity();
+        if (activity == null) return;
+        
+        com.example.filmspace_mobile.data.model.movie.Movie movie = activity.getMovie();
+        if (movie == null) return;
+        
+        // Load episodes from movie object
+        List<Episode> episodes = movie.getEpisodes();
+        if (episodes != null && !episodes.isEmpty()) {
+            episodeAdapter.updateData(episodes);
+        } else {
+            // No episodes available
+            Toast.makeText(getContext(), "No episodes available", Toast.LENGTH_SHORT).show();
+        }
     }
 }

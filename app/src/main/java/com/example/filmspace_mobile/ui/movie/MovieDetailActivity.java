@@ -1,22 +1,28 @@
 package com.example.filmspace_mobile.ui.movie;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.filmspace_mobile.R;
-import com.example.filmspace_mobile.data.model.movie.Cast;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.repository.MovieRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 import com.example.filmspace_mobile.ui.adapters.MovieDetailsPagerAdapter;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import java.util.ArrayList;
-import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MovieDetailActivity extends AppCompatActivity {
 
     private ImageView moviePoster;
@@ -25,9 +31,13 @@ public class MovieDetailActivity extends AppCompatActivity {
     private MaterialButton btnPlay;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+    private ProgressBar progressBar;
 
     private Movie movie;
     private MovieDetailsPagerAdapter pagerAdapter;
+    
+    @Inject
+    MovieRepository movieRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +45,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_details);
 
         initViews();
-        loadMovieData();
-        setupViewPager();
         setupClickListeners();
+        loadMovieData();
     }
 
     private void initViews() {
@@ -47,31 +56,53 @@ public class MovieDetailActivity extends AppCompatActivity {
         btnPlay = findViewById(R.id.btnPlay);
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
+        progressBar = findViewById(R.id.progressBar);
     }
 
     private void loadMovieData() {
-        // TODO: Get movie ID from intent and load from API
-        // int movieId = getIntent().getIntExtra("MOVIE_ID", -1);
+        int movieId = getIntent().getIntExtra("movieId", -1);
+        
+        if (movieId == -1) {
+            Toast.makeText(this, "Invalid movie ID", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // For now, create dummy movie data
-        movie = new Movie();
-        movie.setId(1);
-        movie.setTitle("Stranger Things");
-        movie.setOverview("The film opens with Phineas Taylor \"P.T.\" Barnum (Hugh Jackman) joining his circus troupe in a song (\"The Greatest Show\"), playing to an enthusiastic crowd as he and his performers put on a dazzling show.");
-        movie.setReleaseDate("2021");
-        movie.setSeasonCount(4);
-        movie.setEpisodeCount(34);
-        movie.setGenre("Sci-Fi");
-        movie.setRating(8.7);
+        // Show loading
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        viewPager.setVisibility(View.GONE);
+        tabLayout.setVisibility(View.GONE);
 
-        // Add dummy cast
-        List<Cast> castList = new ArrayList<>();
-        castList.add(new Cast(1, "Peter England", "Character 1", ""));
-        castList.add(new Cast(2, "Rosey Day", "Character 2", ""));
-        castList.add(new Cast(3, "John Doe", "Character 3", ""));
-        movie.setCastList(castList);
+        // Fetch movie details from API
+        movieRepository.getMovieById(movieId, new RepositoryCallback<Movie>() {
+            @Override
+            public void onSuccess(Movie data) {
+                movie = data;
+                
+                // Hide loading
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                viewPager.setVisibility(View.VISIBLE);
+                tabLayout.setVisibility(View.VISIBLE);
+                
+                displayMovieInfo();
+                setupViewPager();
+            }
 
-        displayMovieInfo();
+            @Override
+            public void onError(String errorMessage) {
+                // Hide loading
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                
+                Toast.makeText(MovieDetailActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
     private void displayMovieInfo() {
@@ -117,5 +148,9 @@ public class MovieDetailActivity extends AppCompatActivity {
             // intent.putExtra("MOVIE_ID", movie.getId());
             // startActivity(intent);
         });
+    }
+
+    public Movie getMovie() {
+        return movie;
     }
 }
