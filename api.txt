@@ -1,0 +1,109 @@
+get: /api/Movies
+response:
+    [
+        (list of movies)
+    ]
+
+get: /api/Movies/:id
+response: 
+    {
+        "id": int,
+        "title": string,
+        "description": string,
+        "director": string,
+        "releaseYear": 0,
+        "posterUrl": string,
+        "rating": float,
+        "reviewCount": int,
+        "genres": [] (list of genres),
+        "casts": [] (lsit of casts),
+        "episodes": [] (list of episodes),
+        "reviews": [
+            {
+                "id": 1,
+                "movieId": 1,
+                "userId": 2,
+                "userName": "user1",
+                "rating": 10,
+                "comment": "Masterpiece!",
+                "createdAt": "2025-12-16T04:10:09.624894Z"
+            } (this is the template of a review)
+        ] (list of reviews)
+    }
+
+get: /api/movies/:movieId/Episodes
+response: 
+    [
+        (list of episodes)
+    ]
+
+get: /api/movies/:movieId/Episodes/:episodeId
+response:
+    {
+        "id": int,
+        "movieId": int,
+        "episodeNumber": int,
+        "title": string,
+        "description": string,
+        "duration": int,
+        "videoUrl": string,
+        "releaseDate": date
+    }
+
+get: /api/Genres/:genreId
+response: 
+    {
+        "id": int,
+        "name": string
+    }
+
+get: /api/Reviews/movie/:movieId
+response:
+    [
+        {
+            "id": 2,
+            "movieId": 1,
+            "userId": 3,
+            "userName": "user2",
+            "rating": 9,
+            "comment": "Amazing movie!",
+            "createdAt": "2025-12-16T04:10:09.625491Z"
+        } (review template),
+        (list of reviews)
+    ]
+
+get: /api/casts/:id
+response:
+    {
+        "id": 1,
+        "name": "Tom Hanks",
+        "avatarUrl": "https://via.placeholder.com/150"
+    } (template cast)
+
+get: /api/casts/:id/movies
+response:
+    {
+        "id": 1,
+        "name": "Tom Hanks",
+        "avatarUrl": "https://via.placeholder.com/150",
+        "movies": [
+            {
+                "id": 3,
+                "title": "Inception",
+                "description": "A thief who steals corporate secrets...",
+                "posterUrl": "https://via.placeholder.com/300x450",
+                "releaseYear": 2010,
+                "rating": 0,
+                "genres": [],
+                "casts": []
+            }
+        ] (cast with movies template)
+    }
+
+put: /api/users/:userId
+request:
+    {
+        username: string
+        email: string
+        avatarUrl: string
+    }

@@ -1,26 +1,37 @@
 package com.example.filmspace_mobile.data.model.movie;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Episode {
     private int id;
+    private int movieId;
     private int episodeNumber;
     private String title;
+    
+    @SerializedName("description")
     private String overview;
+    
     private String thumbnailUrl;
     private int duration; // in minutes
+    private String videoUrl;
+    
+    @SerializedName("releaseDate")
     private String airDate;
 
     // Constructor rỗng
     public Episode() {}
 
     // Constructor đầy đủ
-    public Episode(int id, int episodeNumber, String title, String overview,
-                   String thumbnailUrl, int duration, String airDate) {
+    public Episode(int id, int movieId, int episodeNumber, String title, String overview,
+                   String thumbnailUrl, int duration, String videoUrl, String airDate) {
         this.id = id;
+        this.movieId = movieId;
         this.episodeNumber = episodeNumber;
         this.title = title;
         this.overview = overview;
         this.thumbnailUrl = thumbnailUrl;
         this.duration = duration;
+        this.videoUrl = videoUrl;
         this.airDate = airDate;
     }
 
@@ -79,5 +90,21 @@ public class Episode {
 
     public void setAirDate(String airDate) {
         this.airDate = airDate;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 }

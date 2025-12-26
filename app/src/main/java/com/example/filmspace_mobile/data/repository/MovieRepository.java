@@ -77,6 +77,31 @@ public class MovieRepository {
     }
 
     /**
+     * Fetch movie by ID with full details (cast, episodes, reviews)
+     * @param movieId The movie ID to fetch
+     * @param callback Callback to handle success or failure
+     */
+    public void getMovieById(int movieId, RepositoryCallback<Movie> callback) {
+        apiService.getMovieById(movieId).enqueue(new Callback<Movie>() {
+            @Override
+            public void onResponse(Call<Movie> call, Response<Movie> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    String errorMessage = getHttpErrorMessage(response.code());
+                    callback.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Movie> call, Throwable t) {
+                String errorMessage = getNetworkErrorMessage(t);
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
+    /**
      * Fetch recommended movies for the user
      * @param limit The number of recommendations to fetch
      * @param callback Callback to handle success or failure

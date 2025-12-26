@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -53,46 +54,20 @@ public class MovieReviewFragment extends Fragment {
     }
 
     private void loadReviews() {
-        // TODO: Load from API
-        // For now, load dummy data
-        List<Review> dummyReviews = new ArrayList<>();
-
-        dummyReviews.add(new Review(
-                1,
-                "Tarun Kumar",
-                "",
-                4.5f,
-                "Amazing! The room is good than the picture. Thanks for amazing experience!",
-                "2 days ago"
-        ));
-
-        dummyReviews.add(new Review(
-                2,
-                "Abhishek Kumar",
-                "",
-                5.0f,
-                "The service is on point, and I really like the facilities. Good job!",
-                "3 days ago"
-        ));
-
-        dummyReviews.add(new Review(
-                3,
-                "Mohit Yadav",
-                "",
-                5.0f,
-                "The service is on point, and I really like the facilities. Good job!",
-                "5 days ago"
-        ));
-
-        dummyReviews.add(new Review(
-                4,
-                "Payal Yadav",
-                "",
-                5.0f,
-                "Excellent experience! The staff was very helpful and accommodating. Highly recommend!",
-                "1 week ago"
-        ));
-
-        reviewAdapter.updateData(dummyReviews);
+        // Get movie from parent activity
+        MovieDetailActivity activity = (MovieDetailActivity) getActivity();
+        if (activity == null) return;
+        
+        com.example.filmspace_mobile.data.model.movie.Movie movie = activity.getMovie();
+        if (movie == null) return;
+        
+        // Load reviews from movie object
+        List<Review> reviews = movie.getReviews();
+        if (reviews != null && !reviews.isEmpty()) {
+            reviewAdapter.updateData(reviews);
+        } else {
+            // No reviews available
+            Toast.makeText(getContext(), "No reviews yet", Toast.LENGTH_SHORT).show();
+        }
     }
 }
