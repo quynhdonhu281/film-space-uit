@@ -2,4 +2,45 @@
 <resources>
     <string name="app_name">FilmSpace_Mobile</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--    Onboarding-->
+    <string name="onboarding1_title">Watch Anytime, Anywhere</string>
+    <string name="onboarding1_text">
+        Experience seamless streaming no matter where you are.
+        From your daily commute to a cozy café, your favorite movies are always in your pocket.
+    </string>
+
+    <string name="onboarding2_title">Massive Movie Library</string>
+    <string name="onboarding2_text">
+        Dive into a vast collection of content.
+        From the latest Hollywood blockbusters to timeless classics, we have every genre to satisfy your cinematic cravings.
+    </string>
+
+    <string name="onboarding3_title">Cherish Moments Together</string>
+    <string name="onboarding3_text">
+        Movies are meant to be shared.
+        Create unforgettable memories by bonding with friends and family over a great story every weekend.
+    </string>
+    <!--Onboarding-->
+
+    <!-- FAQ -->
+    <string name="faq_question_1">How do I create an account?</string>
+    <string name="faq_answer_1">To create an account, tap on the Sign Up button on the login screen. Fill in your email address, username, and password, then tap Create Account.</string>
+
+    <string name="faq_question_2">How can I reset my password?</string>
+    <string name="faq_answer_2">On the login screen, tap Forgot Password. Enter your email address and we will send you instructions to reset your password.</string>
+
+    <string name="faq_question_3">How do I search for movies?</string>
+    <string name="faq_answer_3">Use the search icon in the top navigation bar. You can search by movie title, actor name, or genre.</string>
+
+    <string name="faq_question_4">Can I download movies for offline viewing?</string>
+    <string name="faq_answer_4">Yes! Tap the download icon on any movie details page. Downloaded content will be available in your Downloads section.</string>
+
+    <string name="faq_question_5">How do I cancel my subscription?</string>
+    <string name="faq_answer_5">Go to Settings > Account > Manage Subscription, then select Cancel Subscription. Your access will continue until the end of your billing period.</string>
+
+    <!-- Legal Terms -->
+    <string name="terms_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.</string>
+
+    <string name="changes_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.</string>
 </resources>
