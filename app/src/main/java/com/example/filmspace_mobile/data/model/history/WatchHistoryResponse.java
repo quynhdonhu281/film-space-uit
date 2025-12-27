@@ -2,18 +2,35 @@ package com.example.filmspace_mobile.data.model.history;
 
 import com.example.filmspace_mobile.data.model.movie.Movie;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WatchHistoryResponse {
-    private List<Movie> data;
+    private List<WatchHistoryItem> data;
     private Pagination pagination;
 
-    public List<Movie> getData() {
+    public List<WatchHistoryItem> getData() {
         return data;
     }
 
-    public void setData(List<Movie> data) {
+    public void setData(List<WatchHistoryItem> data) {
         this.data = data;
+    }
+
+    /**
+     * Extract movies from watch history items
+     * @return List of movies from history
+     */
+    public List<Movie> getMovies() {
+        List<Movie> movies = new ArrayList<>();
+        if (data != null) {
+            for (WatchHistoryItem item : data) {
+                if (item.getMovie() != null) {
+                    movies.add(item.getMovie());
+                }
+            }
+        }
+        return movies;
     }
 
     public Pagination getPagination() {

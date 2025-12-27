@@ -94,8 +94,8 @@ public class FavoriteFragment extends Fragment {
             public void onSuccess(com.example.filmspace_mobile.data.model.history.WatchHistoryResponse response) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        if (response.getData() != null && !response.getData().isEmpty()) {
-                            historyAdapter.setMovies(response.getData());
+                        if (response.getMovies() != null && !response.getMovies().isEmpty()) {
+                            historyAdapter.setMovies(response.getMovies());
                             binding.historyRecyclerView.setVisibility(View.VISIBLE);
                             binding.emptyStateLayout.setVisibility(View.GONE);
                         } else {

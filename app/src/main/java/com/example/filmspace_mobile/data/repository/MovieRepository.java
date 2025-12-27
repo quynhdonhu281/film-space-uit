@@ -111,7 +111,13 @@ public class MovieRepository {
             @Override
             public void onResponse(Call<RecommendationsResponse> call, Response<RecommendationsResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    callback.onSuccess(response.body().getData());
+                    List<Movie> movies = response.body().getData();
+                    // Log for debugging
+                    if (BuildConfig.DEBUG && movies != null && !movies.isEmpty()) {
+                        android.util.Log.d(TAG, "Recommended movies count: " + movies.size());
+                        android.util.Log.d(TAG, "First movie title: " + (movies.get(0).getTitle() != null ? movies.get(0).getTitle() : "NULL"));
+                    }
+                    callback.onSuccess(movies);
                 } else {
                     String errorMessage = getHttpErrorMessage(response.code());
                     callback.onError(errorMessage);
