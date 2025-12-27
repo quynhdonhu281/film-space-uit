@@ -1,9 +1,0 @@
-SearchFragment:
-    at start (when nothing is being searched): the reclyclerview will be the same as the top rating of the HomeFragment
-    when something is being searched (by name): now the reclyclerview will use the viewholder_film.xml to display. The behavior: display item horizontally if the line is full the wrap to the next line
-    if can not search anything then show sorry to the user (haven't had xml for this, you can create new one)
-
-FavoriteFragment (plan to change to history movies)
-    display all the movies that user had watched
-
-ProfileFragment (Use for setting so maybe use the setting instead)
