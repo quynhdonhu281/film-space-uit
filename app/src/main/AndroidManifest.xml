@@ -21,22 +21,19 @@
         <!-- ==================== SETTING (TEST LAUNCHER) ==================== -->
         <activity
             android:name=".ui.setting.SettingActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <activity
             android:name=".ui.setting.EditProfileActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <activity
             android:name=".ui.setting.ChangePasswordActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <activity
@@ -64,11 +61,17 @@
             android:exported="false"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
-        <!-- ==================== MAIN (Disabled for testing) ==================== -->
+        <!-- ==================== MAIN LAUNCHER ==================== -->
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <!-- ==================== TEST LAUNCHER - Direct Movie Detail (Disabled) ==================== -->
         <activity
@@ -92,6 +95,7 @@
         <activity
             android:name=".ui.auth.AuthActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <!-- ==================== MOVIE DETAILS ==================== -->

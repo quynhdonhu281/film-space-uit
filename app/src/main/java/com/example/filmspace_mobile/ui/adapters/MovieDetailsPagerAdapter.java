@@ -27,7 +27,7 @@ public class MovieDetailsPagerAdapter extends FragmentStateAdapter {
                 aboutFragment.setMovie(movie);
                 return aboutFragment;
             case 1:
-                return MovieEpisodeFragment.newInstance();
+                return MovieEpisodeFragment.newInstance(movie);
             case 2:
                 return MovieReviewFragment.newInstance();
             default:

@@ -1,0 +1,7 @@
+1. search box in SearchFragment: kinda small
+2. login and register button in ProfileFragment: kinda small (but the radius kinda work with the ratio)
+3. continue button in Sign In: kinda small
+4. continue button in Register: kinda small
+5. email input got some slight line under the input box: when click in to input the line change color
+6. forgot password email input got some slight line under the input box: when click in to input the line change color
+7. continue button in forgot password: kinda small

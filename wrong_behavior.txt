@@ -1,0 +1,4 @@
+1. some input will have slight line under-->remove all the line
+2. add validation for all password input (if that is for confirm password then add check match the password)
+3. all the resend otp after click add waiting time (only the change password has now)
+4. after change password activate logout (the user need to re login)

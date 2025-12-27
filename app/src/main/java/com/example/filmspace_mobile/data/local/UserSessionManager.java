@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
@@ -24,6 +26,9 @@ public class UserSessionManager {
     private static final String KEY_TOKEN = "token";
 
     private final SharedPreferences prefs;
+    
+    // LiveData for reactive auth state
+    private final MutableLiveData<Boolean> isLoggedInLiveData = new MutableLiveData<>();
 
     public UserSessionManager(Context context) {
         SharedPreferences tempPrefs;
@@ -49,6 +54,16 @@ public class UserSessionManager {
             tempPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         }
         prefs = tempPrefs;
+        
+        // Initialize LiveData with current state
+        isLoggedInLiveData.setValue(isLoggedIn());
+    }
+    
+    /**
+     * Get LiveData for auth state - UI can observe this
+     */
+    public LiveData<Boolean> getIsLoggedInLiveData() {
+        return isLoggedInLiveData;
     }
 
     /**
@@ -71,6 +86,9 @@ public class UserSessionManager {
         editor.putString(KEY_NAME, name);
         editor.putString(KEY_TOKEN, token);
         editor.apply();
+        
+        // Update LiveData
+        isLoggedInLiveData.postValue(true);
     }
 
     /**
@@ -129,6 +147,9 @@ public class UserSessionManager {
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.apply();
+        
+        // Update LiveData
+        isLoggedInLiveData.postValue(false);
     }
 
     /**

@@ -19,7 +19,6 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.filmspace_mobile.ui.adapters.GenreAdapter;
 import com.example.filmspace_mobile.ui.adapters.MovieAdapter;
@@ -31,13 +30,12 @@ import com.example.filmspace_mobile.ui.movie.MovieDetailActivity;
 import com.example.filmspace_mobile.ui.movie.MoviesByGenreActivity;
 import com.example.filmspace_mobile.viewmodel.GenreViewModel;
 import com.example.filmspace_mobile.viewmodel.MovieViewModel;
+import com.google.android.material.snackbar.Snackbar;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
-    private MovieViewModel movieViewModel;
-    private GenreViewModel genreViewModel;
     private HomeViewModel homeViewModel;
     private FragmentHomeBinding binding;
     
@@ -51,6 +49,7 @@ public class HomeFragment extends Fragment {
     private Handler autoScrollHandler;
     private Runnable autoScrollRunnable;
     private static final long AUTO_SCROLL_DELAY = 3000; // 3 seconds
+    private boolean isViewCreated = false;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -71,10 +70,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        isViewCreated = true;
 
-        // Initialize ViewModels
-        movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
-        genreViewModel = new ViewModelProvider(this).get(GenreViewModel.class);
+        // Initialize ViewModel - Only need HomeViewModel now!
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         setupViewPager();
@@ -138,53 +136,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupObservers() {
-        // Observe all movies from MovieViewModel and update HomeViewModel
-        movieViewModel.getAllMovies().observe(getViewLifecycleOwner(), movies -> {
-            if (movies != null && !movies.isEmpty()) {
-                homeViewModel.setMovies(movies);
-            }
-        });
-
-        // Observe movies error
-        movieViewModel.getMoviesError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                homeViewModel.setMoviesError(error);
-            }
-        });
-
-        // Observe movies loading
-        movieViewModel.getMoviesLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) {
-                homeViewModel.setMoviesLoading(isLoading);
-            }
-        });
-
-        // Observe genres from GenreViewModel and update HomeViewModel
-        genreViewModel.getGenres().observe(getViewLifecycleOwner(), genres -> {
-            if (genres != null && !genres.isEmpty()) {
-                homeViewModel.setGenres(genres);
-            }
-        });
-
-        // Observe genres error
-        genreViewModel.getGenresError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                homeViewModel.setGenresError(error);
-            }
-        });
-
-        // Observe genres loading
-        genreViewModel.getGenresLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) {
-                homeViewModel.setGenresLoading(isLoading);
-            }
-        });
-
         // Observe HomeViewModel data for UI updates
         homeViewModel.getSliderMovies().observe(getViewLifecycleOwner(), movies -> {
             if (movies != null && !movies.isEmpty()) {
                 sliderAdapter.setMovies(movies);
-                binding.viewPager.post(() -> binding.viewPager.setCurrentItem(Integer.MAX_VALUE / 2, false));
+                // Set to middle copy (second set of the tripled data)
+                binding.viewPager.post(() -> binding.viewPager.setCurrentItem(movies.size(), false));
                 binding.viewPager.setVisibility(View.VISIBLE);
             } else {
                 binding.viewPager.setVisibility(View.GONE);
@@ -241,8 +198,10 @@ public class HomeFragment extends Fragment {
 
         // Observe error states from HomeViewModel
         homeViewModel.getMoviesError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+            if (error != null && getView() != null) {
+                Snackbar.make(getView(), error, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry, v -> reloadData())
+                    .show();
                 binding.shimmerBestMovies.getRoot().setVisibility(View.GONE);
                 binding.shimmerBestMovies.shimmerMovies1.stopShimmer();
                 binding.shimmerBestMovies.shimmerMovies2.stopShimmer();
@@ -301,22 +260,30 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupAutoScroll() {
+        // Use modern Handler constructor
         autoScrollHandler = new Handler(Looper.getMainLooper());
         autoScrollRunnable = new Runnable() {
             @Override
             public void run() {
-                if (binding != null && sliderAdapter.getItemCount() > 0) {
+                // Check if view is still created and visible
+                if (isViewCreated && binding != null && sliderAdapter.getItemCount() > 0 
+                    && isResumed() && getUserVisibleHint()) {
                     int currentItem = binding.viewPager.getCurrentItem();
                     int nextItem = currentItem + 1;
                     binding.viewPager.setCurrentItem(nextItem, true);
-                    autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+                    // Re-schedule only if still active
+                    if (isViewCreated && isResumed()) {
+                        autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+                    }
                 }
             }
         };
     }
 
     private void startAutoScroll() {
-        if (autoScrollHandler != null && autoScrollRunnable != null) {
+        if (autoScrollHandler != null && autoScrollRunnable != null && isViewCreated) {
+            // Remove any pending callbacks first
+            autoScrollHandler.removeCallbacks(autoScrollRunnable);
             autoScrollHandler.postDelayed(autoScrollRunnable, AUTO_SCROLL_DELAY);
         }
     }
@@ -330,7 +297,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        startAutoScroll();
+        if (isViewCreated) {
+            startAutoScroll();
+        }
     }
 
     @Override
@@ -342,7 +311,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        isViewCreated = false;
         stopAutoScroll();
+        // Clean up handler to prevent memory leaks
+        if (autoScrollHandler != null) {
+            autoScrollHandler.removeCallbacksAndMessages(null);
+        }
         binding = null;
     }
 
@@ -357,25 +331,37 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadData() {
-        movieViewModel.fetchAllMovies();
-        genreViewModel.fetchGenres();
+        homeViewModel.loadMovies();
+        homeViewModel.loadGenres();
         homeViewModel.loadRecommendedMovies();
     }
 
     private void refreshData() {
         // Show refresh indicator
-        binding.swipeRefreshLayout.setRefreshing(true);
+        if (binding != null) {
+            binding.swipeRefreshLayout.setRefreshing(true);
+        }
         
         // Reload data
-        movieViewModel.fetchAllMovies();
-        genreViewModel.fetchGenres();
+        homeViewModel.loadMovies();
+        homeViewModel.loadGenres();
         homeViewModel.loadRecommendedMovies();
         
-        // Hide refresh indicator after a short delay (data will update via observers)
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (binding != null) {
-                binding.swipeRefreshLayout.setRefreshing(false);
-            }
-        }, 1000);
+        // Hide refresh indicator after a short delay using lifecycle-aware approach
+        if (getView() != null && isAdded()) {
+            getView().postDelayed(() -> {
+                // Double-check view is still valid
+                if (isViewCreated && binding != null && isAdded()) {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                }
+            }, 1000);
+        }
+    }
+    
+    /**
+     * Public method to reload data (called from MainActivity on retry)
+     */
+    public void reloadData() {
+        loadData();
     }
 }

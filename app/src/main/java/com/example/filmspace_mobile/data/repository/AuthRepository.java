@@ -211,6 +211,31 @@ public class AuthRepository {
         });
     }
 
+    // Logout
+    public void logout(RepositoryCallback<Void> callback) {
+        apiService.logout().enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                // Clear session regardless of server response
+                sessionManager.clearSession();
+                
+                if (response.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    // Still call success since local session is cleared
+                    callback.onSuccess(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Clear session even on network failure
+                sessionManager.clearSession();
+                callback.onSuccess(null);
+            }
+        });
+    }
+
     // Helper methods for error messages
     private String getErrorMessage(int code, String action) {
         switch (code) {

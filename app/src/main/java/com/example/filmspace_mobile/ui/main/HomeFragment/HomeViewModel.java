@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Genre;
 import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.example.filmspace_mobile.data.repository.GenreRepository;
@@ -25,6 +26,7 @@ public class HomeViewModel extends ViewModel {
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
+    private final UserSessionManager sessionManager;
 
     // LiveData for slider movies
     private final MutableLiveData<List<Movie>> sliderMoviesLiveData = new MutableLiveData<>();
@@ -56,9 +58,10 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> genresErrorLiveData = new MutableLiveData<>();
 
     @Inject
-    public HomeViewModel(MovieRepository movieRepository, GenreRepository genreRepository) {
+    public HomeViewModel(MovieRepository movieRepository, GenreRepository genreRepository, UserSessionManager sessionManager) {
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
+        this.sessionManager = sessionManager;
     }
 
     // Getters for LiveData
@@ -143,6 +146,13 @@ public class HomeViewModel extends ViewModel {
 
     // Load recommended movies from API
     public void loadRecommendedMovies() {
+        // Only load recommendations if user is logged in
+        if (!sessionManager.isLoggedIn()) {
+            // User not logged in, clear recommended movies
+            recommendedMoviesLiveData.setValue(new ArrayList<>());
+            return;
+        }
+        
         moviesLoadingLiveData.setValue(true);
 
         movieRepository.getRecommendedMovies(10, new RepositoryCallback<List<Movie>>() {
@@ -155,7 +165,20 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onError(String error) {
                 moviesLoadingLiveData.setValue(false);
-                moviesErrorLiveData.setValue(error);
+                // Fallback: use all movies sorted by rating as recommended
+                if (allMoviesLiveData.getValue() != null) {
+                    List<Movie> movies = new ArrayList<>(allMoviesLiveData.getValue());
+                    Collections.sort(movies, new Comparator<Movie>() {
+                        @Override
+                        public int compare(Movie m1, Movie m2) {
+                            return Double.compare(m2.getRating(), m1.getRating());
+                        }
+                    });
+                    int count = Math.min(10, movies.size());
+                    recommendedMoviesLiveData.setValue(movies.subList(0, count));
+                } else {
+                    moviesErrorLiveData.setValue(error);
+                }
             }
         });
     }

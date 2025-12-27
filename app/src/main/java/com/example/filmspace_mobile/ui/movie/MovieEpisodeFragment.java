@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Episode;
+import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.example.filmspace_mobile.ui.adapters.EpisodeAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +21,24 @@ import java.util.List;
 public class MovieEpisodeFragment extends Fragment {
 
     private RecyclerView rvEpisodes;
+    private TextView tvEmptyState;
     private EpisodeAdapter episodeAdapter;
+    private Movie movie;
 
-    public static MovieEpisodeFragment newInstance() {
-        return new MovieEpisodeFragment();
+    public static MovieEpisodeFragment newInstance(Movie movie) {
+        MovieEpisodeFragment fragment = new MovieEpisodeFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("movie", movie);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            movie = (Movie) getArguments().getSerializable("movie");
+        }
     }
 
     @Nullable
@@ -43,17 +59,22 @@ public class MovieEpisodeFragment extends Fragment {
 
     private void initViews(View view) {
         rvEpisodes = view.findViewById(R.id.rvEpisodes);
+        tvEmptyState = view.findViewById(R.id.tvEmptyState);
     }
 
     private void setupRecyclerView() {
+        if (getContext() == null) return;
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvEpisodes.setLayoutManager(layoutManager);
 
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
             // Handle episode click - play video
-            Toast.makeText(getContext(),
-                    "Play: " + episode.getTitle(),
-                    Toast.LENGTH_SHORT).show();
+            if (getContext() != null) {
+                Toast.makeText(getContext(),
+                        "Play: " + episode.getTitle(),
+                        Toast.LENGTH_SHORT).show();
+            }
             // TODO: Navigate to video player
         });
 
@@ -61,20 +82,39 @@ public class MovieEpisodeFragment extends Fragment {
     }
 
     private void loadEpisodes() {
-        // Get movie from parent activity
-        MovieDetailActivity activity = (MovieDetailActivity) getActivity();
-        if (activity == null) return;
+        // Check if fragment is still attached and activity is not finishing
+        if (!isAdded() || getContext() == null || getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
         
-        com.example.filmspace_mobile.data.model.movie.Movie movie = activity.getMovie();
-        if (movie == null) return;
+        // Get movie from arguments or parent activity
+        if (movie == null) {
+            if (getActivity() instanceof MovieDetailActivity) {
+                MovieDetailActivity activity = (MovieDetailActivity) getActivity();
+                movie = activity.getMovie();
+            }
+        }
+        
+        if (movie == null) {
+            showEmptyState(true);
+            return;
+        }
         
         // Load episodes from movie object
         List<Episode> episodes = movie.getEpisodes();
         if (episodes != null && !episodes.isEmpty()) {
             episodeAdapter.updateData(episodes);
+            showEmptyState(false);
         } else {
-            // No episodes available
-            Toast.makeText(getContext(), "No episodes available", Toast.LENGTH_SHORT).show();
+            // No episodes available - show empty state instead of toast
+            showEmptyState(true);
+        }
+    }
+
+    private void showEmptyState(boolean show) {
+        if (tvEmptyState != null && rvEpisodes != null) {
+            tvEmptyState.setVisibility(show ? View.VISIBLE : View.GONE);
+            rvEpisodes.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 }

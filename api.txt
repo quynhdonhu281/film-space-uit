@@ -107,3 +107,51 @@ request:
         email: string
         avatarUrl: string
     }
+
+post (use for login user): /api/Auth/reset-password
+request:
+    {
+        email: string
+        otp: string (will be sent to user email)
+        newPassword: string
+    }
+
+post (use for login user): /api/Auth/logout
+no request, no response
+
+get (use for login user): /api/Movies/search?keyword=test&genreId=1&releaseYear=2024&sortBy=title&sortDescending=false
+response: 
+    [
+        (list of movies)
+    ]
+
+get (use for login user): /api/history/watched?page=1&pageSize=10
+response: 
+    {
+        "data": [] (list of movie),
+        "pagination": {
+            "currentPage": 1,
+            "pageSize": 10,
+            "totalItems": 0,
+            "totalPages": 0
+        } (pagination)
+    }
+
+post (use for login user): /api/history
+request: 
+    {
+        "movieId": int
+    }
+
+del (use for login user): /api/history/:movieId
+
+del (use for login user): /api/history/clear (clear all the history)
+
+post (use for login user): /api/Reviews
+request: 
+    {
+        "movieId": int,
+        "userId": int,
+        "rating": int,
+        "comment": string
+    }

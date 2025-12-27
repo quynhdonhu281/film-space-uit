@@ -6,13 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:padding="24dp">
+    android:padding="@dimen/spacing_xl">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="350dp"
-        android:layout_marginTop="20dp"
-        app:cardCornerRadius="24dp"
+        android:layout_marginTop="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/spacing_xl"
         app:cardElevation="0dp">
 
         <ImageView
@@ -28,10 +28,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/onboarding1_title"
-        android:textColor="@android:color/black"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginTop="32dp"
+        android:textAppearance="@style/TextAppearance.FilmSpace.Display"
+        android:layout_marginTop="@dimen/spacing_xxl"
         android:gravity="center" />
 
     <TextView
@@ -39,22 +37,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/onboarding1_text"
-        android:textColor="#444444"
-        android:textSize="16sp"
-        android:layout_marginTop="12dp"
-        android:lineSpacingExtra="4dp"
+        android:textColor="@color/darker_gray"
+        android:textSize="@dimen/text_size_subhead"
+        android:layout_marginTop="@dimen/spacing_m"
+        android:lineSpacingExtra="@dimen/spacing_xs"
         android:gravity="center" />
-    <androidx.appcompat.widget.AppCompatButton
+    <Button
         android:id="@+id/btnContinue"
+        style="@style/Widget.FilmSpace.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Continue"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/rounded"
-        android:backgroundTint="@color/color_main"
-        android:textColor="@android:color/white"
-        android:textAllCaps="false"
-        android:textSize="18sp" />
+        android:layout_marginTop="@dimen/spacing_xxl"
+        android:layout_marginBottom="@dimen/spacing_l" />
 
 </LinearLayout>

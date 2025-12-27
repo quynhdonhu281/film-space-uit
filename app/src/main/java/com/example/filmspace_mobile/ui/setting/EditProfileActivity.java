@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +20,7 @@ import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.auth.UserResponse;
 import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 import com.example.filmspace_mobile.data.repository.UserRepository;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,6 +68,21 @@ public class EditProfileActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editEmail);
         btnSave = findViewById(R.id.btnSave);
         progressBar = new ProgressBar(this);
+        
+        // Prevent spaces and multiple lines in username
+        editUsername.setFilters(new android.text.InputFilter[] {
+            new android.text.InputFilter() {
+                @Override
+                public CharSequence filter(CharSequence source, int start, int end, android.text.Spanned dest, int dstart, int dend) {
+                    // Remove spaces and newlines
+                    if (source.toString().contains(" ") || source.toString().contains("\n")) {
+                        return source.toString().replace(" ", "").replace("\n", "");
+                    }
+                    return null;
+                }
+            }
+        });
+        editUsername.setSingleLine(true);
     }
 
     private void setupListeners() {
@@ -170,6 +185,12 @@ public class EditProfileActivity extends AppCompatActivity {
             editUsername.requestFocus();
             return;
         }
+        
+        if (username.contains(" ")) {
+            editUsername.setError("Username cannot contain spaces");
+            editUsername.requestFocus();
+            return;
+        }
 
         if (email.isEmpty()) {
             editEmail.setError("Email is required");
@@ -233,7 +254,7 @@ public class EditProfileActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             btnSave.setEnabled(true);
             btnSave.setText("Save Changes");
-            Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), "Profile updated successfully!", Snackbar.LENGTH_SHORT).show();
             finish();
         });
     }
@@ -242,7 +263,7 @@ public class EditProfileActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             btnSave.setEnabled(true);
             btnSave.setText("Save Changes");
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
         });
     }
 }

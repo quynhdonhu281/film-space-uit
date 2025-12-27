@@ -2,9 +2,12 @@ package com.example.filmspace_mobile.data.model.movie;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Movie {
+public class Movie implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private int id;
     private String title;
     private String posterUrl;

@@ -27,6 +27,7 @@ public class CreateNewPasswordFragment extends Fragment {
 
     private String userEmail;
     private AuthViewModel authViewModel;
+    private android.os.CountDownTimer countDownTimer;
 
     public CreateNewPasswordFragment() {
         // Required empty public constructor
@@ -55,6 +56,27 @@ public class CreateNewPasswordFragment extends Fragment {
         TextInputEditText passwordInput = view.findViewById(R.id.passwordTextInput);
         TextInputEditText confirmPasswordInput = view.findViewById(R.id.confirmPasswordTextInput);
         TextInputEditText otpInput = view.findViewById(R.id.otpTextInput);
+
+        // Add password matching TextWatcher
+        confirmPasswordInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String password = passwordInput.getText().toString();
+                String confirmPassword = s.toString();
+                
+                if (!confirmPassword.isEmpty() && !password.equals(confirmPassword)) {
+                    confirmPasswordInput.setError("Passwords do not match");
+                } else {
+                    confirmPasswordInput.setError(null);
+                }
+            }
+            
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         // Observe forgot password response for resend OTP
         authViewModel.getForgotPasswordResponse().observe(getViewLifecycleOwner(), response -> {
@@ -92,9 +114,12 @@ public class CreateNewPasswordFragment extends Fragment {
         });
 
         // Resend OTP button
-        view.findViewById(R.id.resendCodeTextView).setOnClickListener(v -> {
+        android.widget.TextView resendCodeTextView = view.findViewById(R.id.resendCodeTextView);
+        resendCodeTextView.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(userEmail)) {
+                resendCodeTextView.setEnabled(false);
                 authViewModel.forgotPassword(userEmail);
+                startCountdown(resendCodeTextView);
             } else {
                 Toast.makeText(requireContext(), "Email not found", Toast.LENGTH_SHORT).show();
             }
@@ -167,5 +192,34 @@ public class CreateNewPasswordFragment extends Fragment {
         view.findViewById(R.id.imageButton).setOnClickListener(v -> {
             requireActivity().onBackPressed();
         });
+    }
+
+    private void startCountdown(android.widget.TextView textView) {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+
+        countDownTimer = new android.os.CountDownTimer(60000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                int secondsLeft = (int) (millisUntilFinished / 1000);
+                textView.setText("Resend (" + secondsLeft + "s)");
+            }
+
+            @Override
+            public void onFinish() {
+                textView.setEnabled(true);
+                textView.setText("Resend code");
+            }
+        };
+        countDownTimer.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 }

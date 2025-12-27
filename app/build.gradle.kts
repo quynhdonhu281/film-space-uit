@@ -18,14 +18,14 @@ android {
         
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
-        // Use your actual IP (e.g., 10.0.186.100) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.168.176:8080/\"")
+        // Use your actual IP (e.g., 192.168.1.25) for physical device
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.25:8080/\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.168.176:8080/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.25:8080/\"")
         }
         release {
             isMinifyEnabled = true
@@ -79,6 +79,14 @@ dependencies {
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
+    
+    // Paging 3 for pagination
+    implementation ("androidx.paging:paging-runtime:3.3.5")
+
+    // Room for local database
+    implementation ("androidx.room:room-runtime:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-paging:2.6.1")
 
     // Security - EncryptedSharedPreferences
     implementation ("androidx.security:security-crypto:1.1.0")
