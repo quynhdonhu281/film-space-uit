@@ -19,13 +19,13 @@ android {
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
         // Use your actual IP (e.g., 10.0.186.100) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.243.149:8080/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.221:8080\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.243.149:8080/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.221:8080\"")
         }
         release {
             isMinifyEnabled = true
