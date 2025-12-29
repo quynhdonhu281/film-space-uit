@@ -1,9 +1,12 @@
 package com.example.filmspace_mobile.data.model.auth;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RegisterRequest {
     private String email;
     private String password;
     private String username;
+    @SerializedName("fullname")
     private String fullname;
 
     public RegisterRequest(String email, String password, String username, String fullname) {

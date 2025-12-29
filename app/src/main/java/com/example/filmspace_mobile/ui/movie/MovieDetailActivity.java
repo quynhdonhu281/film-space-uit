@@ -6,6 +6,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,6 +23,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+
+import com.bumptech.glide.Glide;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -57,7 +61,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
 
-        initViews();
+        initViews();        
         setupClickListeners();
         
         // Check if we have saved movie data
@@ -89,6 +93,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void loadMovieData() {
         // Try to get movieId from saved state first, then from intent
         int movieId = currentMovieId;
+
         if (movieId == -1) {
             movieId = getIntent().getIntExtra("movieId", -1);
         }
@@ -145,6 +150,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 if (rootView != null) {
                     Snackbar.make(rootView, errorMessage, Snackbar.LENGTH_LONG).show();
                 }
+                Toast.makeText(MovieDetailActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
@@ -167,11 +173,18 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void displayMovieInfo() {
         movieTitle.setText(movie.getTitle());
 
-        // TODO: Load poster image with Glide/Picasso
-        // Glide.with(this)
-        //     .load(movie.getBackdropUrl())
-        //     .placeholder(R.drawable.ic_movie_placeholder)
-        //     .into(moviePoster);
+        // Load poster image with Glide, handle empty/null URL
+        String posterUrl = movie.getPosterUrl();
+        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
+            Glide.with(this)
+                .load(posterUrl)
+                .placeholder(R.drawable.movie_poster_placeholder)
+                .error(R.drawable.movie_poster_placeholder)
+                .into(moviePoster);
+        } else {
+            // Show placeholder if no poster URL
+            moviePoster.setImageResource(R.drawable.movie_poster_placeholder);
+        }
     }
 
     private void setupViewPager() {

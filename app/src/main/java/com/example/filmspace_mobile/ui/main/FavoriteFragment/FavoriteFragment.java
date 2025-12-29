@@ -1,3 +1,4 @@
+
 package com.example.filmspace_mobile.ui.main.FavoriteFragment;
 
 import android.content.Intent;
@@ -32,6 +33,11 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class FavoriteFragment extends Fragment {
+        @Override
+        public void onResume() {
+            super.onResume();
+            loadMovies(); // Refresh history every time fragment resumes
+        }
     private FragmentFavoriteBinding binding;
     private MovieViewModel movieViewModel;
     private SearchGridAdapter historyAdapter;

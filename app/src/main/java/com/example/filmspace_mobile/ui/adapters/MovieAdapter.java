@@ -84,7 +84,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
                 .into(holder.pic);
 
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null && movie.getId() > 0) {
+            if (listener != null) {
+                // Debug: Log movie id
+                android.util.Log.d("MovieAdapter", "Clicked movie id: " + movie.getId());
                 listener.onMovieClick(movie);
             }
         });
