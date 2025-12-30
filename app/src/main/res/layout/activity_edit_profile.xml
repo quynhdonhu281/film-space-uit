@@ -76,6 +76,7 @@
         android:id="@+id/editEmail"
         android:layout_width="match_parent"
         android:layout_height="@dimen/input_height_large"
+        android:enabled="false"
         android:hint="Email or Phone Number"
         android:text="mahityadav198299@mail.com"
         android:gravity="center_vertical"

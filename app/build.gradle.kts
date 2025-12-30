@@ -18,14 +18,14 @@ android {
         
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
-        // Use your actual IP (e.g., 192.168.1.221) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.221:8080/\"")
+        // Use your actual IP (e.g., 172.30.128.1) for physical device
+        buildConfigField("String", "API_BASE_URL", "\"http://172.30.128.1:8080/\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.221:8080/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://172.30.128.1:8080/\"")
         }
         release {
             isMinifyEnabled = true
@@ -100,4 +100,6 @@ dependencies {
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)
+
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 }

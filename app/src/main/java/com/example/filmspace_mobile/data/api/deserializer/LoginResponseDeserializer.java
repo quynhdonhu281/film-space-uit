@@ -1,5 +1,7 @@
 package com.example.filmspace_mobile.data.api.deserializer;
 
+import android.util.Log;
+
 import com.example.filmspace_mobile.data.api.CloudFrontUrlHelper;
 import com.example.filmspace_mobile.data.model.auth.LoginResponse;
 import com.google.gson.JsonDeserializationContext;
@@ -11,6 +13,8 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 
 public class LoginResponseDeserializer implements JsonDeserializer<LoginResponse> {
+    
+    private static final String TAG = "LoginResponseDeserializer";
     
     @Override
     public LoginResponse deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) 
@@ -42,7 +46,7 @@ public class LoginResponseDeserializer implements JsonDeserializer<LoginResponse
             
             java.lang.reflect.Field nameField = LoginResponse.class.getDeclaredField("name");
             nameField.setAccessible(true);
-            if (jsonObject.has("name")) {
+            if (jsonObject.has("name") && !jsonObject.get("name").isJsonNull()) {
                 nameField.set(response, jsonObject.get("name").getAsString());
             }
             
@@ -60,7 +64,16 @@ public class LoginResponseDeserializer implements JsonDeserializer<LoginResponse
                 avatarUrlField.set(response, CloudFrontUrlHelper.prependCloudFrontUrl(avatarUrl));
             }
             
+            java.lang.reflect.Field isPremiumField = LoginResponse.class.getDeclaredField("isPremium");
+            isPremiumField.setAccessible(true);
+            if (jsonObject.has("isPremium")) {
+                isPremiumField.set(response, jsonObject.get("isPremium").getAsBoolean());
+            }
+            
+            Log.d(TAG, "LoginResponse deserialized successfully: userId=" + response.getUserId() + ", isPremium=" + response.isPremium());
+            
         } catch (NoSuchFieldException | IllegalAccessException e) {
+            Log.e(TAG, "Error deserializing LoginResponse", e);
             throw new JsonParseException("Error deserializing LoginResponse", e);
         }
         

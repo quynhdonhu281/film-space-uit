@@ -1,6 +1,8 @@
 package com.example.filmspace_mobile.ui.main;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -14,11 +16,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.filmspace_mobile.ui.main.HomeFragment.HomeFragment;
-import com.example.filmspace_mobile.ui.main.ProfileFragment.ProfileFragment;
-import com.example.filmspace_mobile.ui.main.SearchFragment.SearchFragment;
-import com.example.filmspace_mobile.ui.main.FavoriteFragment.FavoriteFragment;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.databinding.ActivityMainBinding;
+
+import androidx.core.splashscreen.SplashScreen;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         

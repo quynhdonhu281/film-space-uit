@@ -6,7 +6,7 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String username;
-    @SerializedName("fullname")
+    @SerializedName("fullName")
     private String fullname;
 
     public RegisterRequest(String email, String password, String username, String fullname) {

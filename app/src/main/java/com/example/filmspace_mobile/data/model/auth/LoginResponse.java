@@ -1,5 +1,7 @@
 package com.example.filmspace_mobile.data.model.auth;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LoginResponse {
     private int userId;
     private String username;
@@ -7,6 +9,8 @@ public class LoginResponse {
     private String avatarUrl;
     private String name;
     private String token;
+    @SerializedName("isPremium")
+    private boolean isPremium;
 
     public int getUserId() {
         return userId;
@@ -30,5 +34,9 @@ public class LoginResponse {
 
     public String getToken() {
         return token;
+    }
+
+    public boolean isPremium() {
+        return isPremium; // Default is false if not provided by backend
     }
 }

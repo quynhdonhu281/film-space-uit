@@ -24,6 +24,7 @@ public class UserSessionManager {
     private static final String KEY_AVATAR_URL = "avatarUrl";
     private static final String KEY_NAME = "name";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_IS_PREMIUM = "isPremium";
 
     private final SharedPreferences prefs;
     
@@ -71,7 +72,7 @@ public class UserSessionManager {
      * Always clears old user data before storing new user (only 1 user stored at a time)
      */
     public void saveUserSession(int userId, String username, String email, 
-                                 String avatarUrl, String name, String token) {
+                                 String avatarUrl, String name, String token, boolean isPremium) {
         SharedPreferences.Editor editor = prefs.edit();
         
         // Clear any existing user data first
@@ -85,6 +86,7 @@ public class UserSessionManager {
         editor.putString(KEY_AVATAR_URL, avatarUrl);
         editor.putString(KEY_NAME, name);
         editor.putString(KEY_TOKEN, token);
+        editor.putBoolean(KEY_IS_PREMIUM, isPremium);
         editor.apply();
         
         // Update LiveData
@@ -138,6 +140,13 @@ public class UserSessionManager {
      */
     public String getToken() {
         return prefs.getString(KEY_TOKEN, null);
+    }
+
+    /**
+     * Check if user is premium
+     */
+    public boolean isPremium() {
+        return prefs.getBoolean(KEY_IS_PREMIUM, false);
     }
 
     /**

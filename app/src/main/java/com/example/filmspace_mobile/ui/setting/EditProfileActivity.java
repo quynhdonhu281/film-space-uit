@@ -248,7 +248,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 user.getEmail(),
                 user.getAvatarUrl(),
                 user.getName(),
-                sessionManager.getToken() // Keep existing token
+                sessionManager.getToken(), // Keep existing token
+                user.isPremium()
         );
 
         runOnUiThread(() -> {

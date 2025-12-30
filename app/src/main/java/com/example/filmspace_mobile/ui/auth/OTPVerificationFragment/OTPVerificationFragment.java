@@ -101,7 +101,8 @@ public class OTPVerificationFragment extends Fragment {
                     verifyResponse.getEmail(),
                     verifyResponse.getAvatarUrl(),
                     verifyResponse.getName(),
-                    verifyResponse.getToken()
+                    verifyResponse.getToken(),
+                    verifyResponse.isPremium()
                 );
                 
                 // Navigate directly to MainActivity

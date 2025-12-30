@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
+import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
 import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.example.filmspace_mobile.ui.adapters.EpisodeAdapter;
@@ -24,6 +25,7 @@ public class MovieEpisodeFragment extends Fragment {
     private TextView tvEmptyState;
     private EpisodeAdapter episodeAdapter;
     private Movie movie;
+    private UserSessionManager sessionManager;
 
     public static MovieEpisodeFragment newInstance(Movie movie) {
         MovieEpisodeFragment fragment = new MovieEpisodeFragment();
@@ -68,6 +70,13 @@ public class MovieEpisodeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvEpisodes.setLayoutManager(layoutManager);
 
+        // Initialize session manager to get user premium status
+        if (sessionManager == null) {
+            sessionManager = new UserSessionManager(getContext());
+        }
+        
+        boolean userIsPremium = sessionManager.isPremium();
+
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
             // Handle episode click - play video
             if (getContext() != null) {
@@ -76,7 +85,7 @@ public class MovieEpisodeFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
             // TODO: Navigate to video player
-        });
+        }, userIsPremium);
 
         rvEpisodes.setAdapter(episodeAdapter);
     }

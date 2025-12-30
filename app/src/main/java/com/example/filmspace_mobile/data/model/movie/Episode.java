@@ -18,6 +18,7 @@ public class Episode implements Serializable {
     private String thumbnailUrl;
     private int duration; // in minutes
     private String videoUrl;
+    private boolean isPremium;
     
     @SerializedName("releaseDate")
     private String airDate;
@@ -27,7 +28,7 @@ public class Episode implements Serializable {
 
     // Constructor đầy đủ
     public Episode(int id, int movieId, int episodeNumber, String title, String overview,
-                   String thumbnailUrl, int duration, String videoUrl, String airDate) {
+                   String thumbnailUrl, int duration, String videoUrl, String airDate, boolean isPremium) {
         this.id = id;
         this.movieId = movieId;
         this.episodeNumber = episodeNumber;
@@ -37,6 +38,7 @@ public class Episode implements Serializable {
         this.duration = duration;
         this.videoUrl = videoUrl;
         this.airDate = airDate;
+        this.isPremium = isPremium;
     }
 
     // Getters and Setters
@@ -110,5 +112,13 @@ public class Episode implements Serializable {
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
+    }
+
+    public boolean isPremium() {
+        return isPremium;
+    }
+
+    public void setPremium(boolean premium) {
+        isPremium = premium;
     }
 }

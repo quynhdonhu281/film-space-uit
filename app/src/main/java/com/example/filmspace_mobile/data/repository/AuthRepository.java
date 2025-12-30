@@ -45,25 +45,35 @@ public class AuthRepository {
         apiService.login(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse loginResponse = response.body();
-                    // Save session
-                    sessionManager.saveUserSession(
-                            loginResponse.getUserId(),
-                            loginResponse.getUsername(),
-                            loginResponse.getEmail(),
-                            loginResponse.getAvatarUrl(),
-                            loginResponse.getName(),
-                            loginResponse.getToken()
-                    );
-                    callback.onSuccess(loginResponse);
-                } else {
-                    callback.onError(getErrorMessage(response.code(), "sign in"));
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        LoginResponse loginResponse = response.body();
+                        android.util.Log.d("AuthRepository", "Login response received: userId=" + loginResponse.getUserId() + ", isPremium=" + loginResponse.isPremium());
+                        // Save session
+                        sessionManager.saveUserSession(
+                                loginResponse.getUserId(),
+                                loginResponse.getUsername(),
+                                loginResponse.getEmail(),
+                                loginResponse.getAvatarUrl(),
+                                loginResponse.getName(),
+                                loginResponse.getToken(),
+                                loginResponse.isPremium()
+                        );
+                        android.util.Log.d("AuthRepository", "Session saved successfully");
+                        callback.onSuccess(loginResponse);
+                    } else {
+                        android.util.Log.e("AuthRepository", "Login failed: response code=" + response.code());
+                        callback.onError(getErrorMessage(response.code(), "sign in"));
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("AuthRepository", "Error in login onResponse", e);
+                    callback.onError("Error processing login response: " + e.getMessage());
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                android.util.Log.e("AuthRepository", "Login network error", t);
                 callback.onError(getNetworkErrorMessage(t));
             }
         });
@@ -73,13 +83,16 @@ public class AuthRepository {
     public void register(String email, String password, String username, String fullname,
                         RepositoryCallback<RegisterResponse> callback) {
         RegisterRequest request = new RegisterRequest(email, password, username, fullname);
+        android.util.Log.d("AuthRepository", "Register request - Email: " + email + ", Username: " + username + ", Fullname: " + fullname);
         
         apiService.register(request).enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    android.util.Log.d("AuthRepository", "Register success - Response: " + response.body().getMessage());
                     callback.onSuccess(response.body());
                 } else {
+                    android.util.Log.e("AuthRepository", "Register failed - Status: " + response.code());
                     String error = "Registration failed. Please try again.";
                     if (response.code() == 409) {
                         error = "Email or username already exists";
@@ -87,6 +100,7 @@ public class AuthRepository {
                     try {
                         if (response.errorBody() != null) {
                             String errorBody = response.errorBody().string();
+                            android.util.Log.e("AuthRepository", "Register error body: " + errorBody);
                             if (errorBody.contains("message")) {
                                 Gson gson = new Gson();
                                 ErrorResponse errorResponse = gson.fromJson(errorBody, ErrorResponse.class);
@@ -102,6 +116,7 @@ public class AuthRepository {
 
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
+                android.util.Log.e("AuthRepository", "Register network error", t);
                 callback.onError(getNetworkErrorMessage(t));
             }
         });
@@ -124,7 +139,8 @@ public class AuthRepository {
                             verifyResponse.getEmail(),
                             verifyResponse.getAvatarUrl(),
                             verifyResponse.getName(),
-                            verifyResponse.getToken()
+                            verifyResponse.getToken(),
+                            verifyResponse.isPremium()
                     );
                     callback.onSuccess(verifyResponse);
                 } else {

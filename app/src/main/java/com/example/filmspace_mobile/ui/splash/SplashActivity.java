@@ -15,7 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_DURATION = 2000; // 2 seconds
+    private static final int SPLASH_DURATION = 3000; // 3 seconds
 
     @Inject
     UserSessionManager sessionManager;

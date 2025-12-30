@@ -64,10 +64,16 @@ public class UserResponseDeserializer implements JsonDeserializer<UserResponse> 
                 reviewCountField.setInt(response, jsonObject.get("reviewCount").getAsInt());
             }
             
-            java.lang.reflect.Field watchlistCountField = UserResponse.class.getDeclaredField("watchlistCount");
-            watchlistCountField.setAccessible(true);
-            if (jsonObject.has("watchlistCount")) {
-                watchlistCountField.setInt(response, jsonObject.get("watchlistCount").getAsInt());
+            // java.lang.reflect.Field watchlistCountField = UserResponse.class.getDeclaredField("watchlistCount");
+            // watchlistCountField.setAccessible(true);
+            // if (jsonObject.has("watchlistCount")) {
+            //     watchlistCountField.setInt(response, jsonObject.get("watchlistCount").getAsInt());
+            // }
+
+            java.lang.reflect.Field isPremiumField = UserResponse.class.getDeclaredField("isPremium");
+            isPremiumField.setAccessible(true);
+            if (jsonObject.has("isPremium")) {
+                isPremiumField.set(response, jsonObject.get("isPremium").getAsBoolean());
             }
             
             // Handle avatarUrl with CloudFront prefix
