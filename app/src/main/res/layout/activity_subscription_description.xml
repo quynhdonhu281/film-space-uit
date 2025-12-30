@@ -81,7 +81,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_check_circle"
-                    android:tint="#6366F1"/>
+                    app:tint="#6366F1"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -114,49 +114,7 @@
                     android:layout_marginStart="12dp"/>
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_check_circle"
-                    android:tint="#6366F1"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Download for offline viewing"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginStart="12dp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_check_circle"
-                    app:tint="#6366F1"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4K Ultra HD quality"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginStart="12dp"/>
-            </LinearLayout>
         </LinearLayout>
 
         <androidx.cardview.widget.CardView
@@ -167,56 +125,7 @@
             android:layout_marginTop="24dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            android:foreground="?attr/selectableItemBackground">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <RadioButton
-                        android:id="@+id/radioMonthly"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:buttonTint="#6366F1"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Monthly Plan"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:layout_marginStart="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="39.000 ₫"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#6366F1"/>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Billed monthly"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:layout_marginStart="42dp"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            android:foreground="?attr/selectableItemBackground"/>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardYearlyPlan"
@@ -250,7 +159,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Yearly Plan"
+                        android:text="Lifetime Plan"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
@@ -259,7 +168,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="360.000 ₫"
+                        android:text="99.000 ₫"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#6366F1"/>
@@ -283,7 +192,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" • Billed annually"
+                        android:text=" • Lifetime Access"
                         android:textSize="12sp"
                         android:textColor="#999999"/>
                 </LinearLayout>

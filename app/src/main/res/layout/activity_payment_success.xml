@@ -69,7 +69,7 @@
                         android:id="@+id/tvPlanName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Movies 1 Year Subscription"
+                        android:text="Lifetime Purchase"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black" />
