@@ -38,6 +38,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:text="Top Rating Movies"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
 

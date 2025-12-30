@@ -136,16 +136,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (isFullscreen) {
-            // Exit fullscreen first
-            exitFullscreen();
-        } else {
-            // Exit activity
-            super.onBackPressed();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+//        if (isFullscreen) {
+//            // Exit fullscreen first
+//            exitFullscreen();
+//        } else {
+//            // Exit activity
+//            super.onBackPressed();
+//        }
+//    }
 
     // ==============================
     // Get Intent Data

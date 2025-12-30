@@ -3,11 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/spacing_l"
+    android:backgroundTint="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.auth.SignInFragment.SignInFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_margin="@dimen/spacing_l"
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

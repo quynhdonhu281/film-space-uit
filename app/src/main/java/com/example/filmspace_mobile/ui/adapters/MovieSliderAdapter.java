@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Movie;
 
@@ -74,9 +75,11 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
         private TextView movieTitle;
         private TextView movieGenres;
         private Button detailsButton;
+        private ShimmerFrameLayout shimmerFrameLayout;
 
         public SliderViewHolder(@NonNull View itemView) {
             super(itemView);
+            shimmerFrameLayout = (ShimmerFrameLayout) itemView;
             imageView = itemView.findViewById(R.id.imageSlide);
             movieTitle = itemView.findViewById(R.id.movieTitle);
             movieGenres = itemView.findViewById(R.id.movieGenres);
@@ -84,13 +87,22 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
         }
 
         void setImage(Movie movie) {
-            // Load image without additional rounded corners since CardView handles it
-            Glide.with(context)
-                    .load(movie.getPosterUrl())
-                    .apply(new RequestOptions().transform(new CenterCrop()))
-                    .placeholder(R.drawable.movie_poster_placeholder)
-                    .error(R.drawable.movie_poster_placeholder)
-                    .into(imageView);
+            // Validate poster URL before loading with Glide
+            String posterUrl = movie.getPosterUrl();
+            if (posterUrl == null || posterUrl.trim().isEmpty()) {
+                // Skip Glide loading for invalid URLs to prevent ANR
+                imageView.setImageResource(R.drawable.movie_poster_placeholder);
+            } else {
+                // Load image with timeout and disk cache strategy
+                Glide.with(context)
+                        .load(posterUrl)
+                        .apply(new RequestOptions()
+                            .transform(new CenterCrop())
+                            .dontTransform())  // Use cached version if available
+                        .placeholder(R.drawable.movie_poster_placeholder)
+                        .error(R.drawable.movie_poster_placeholder)
+                        .into(imageView);
+            }
 
             // Set movie title
             movieTitle.setText(movie.getTitle());
@@ -120,6 +132,18 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
                     listener.onMovieClick(movie);
                 }
             });
+        }
+
+        public void startShimmer() {
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.startShimmer();
+            }
+        }
+
+        public void stopShimmer() {
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.stopShimmer();
+            }
         }
     }
 }

@@ -15,7 +15,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_DURATION = 3000; // 3 seconds
+    // Reduced splash duration for faster app startup
+    private static final int SPLASH_DURATION = 1500; // 1.5 seconds (was 3 seconds)
 
     @Inject
     UserSessionManager sessionManager;
@@ -25,18 +26,27 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Check if user is already logged in after splash delay
+        // Skip heavy initialization on splash screen
+        // Transition to next screen as fast as possible
+        navigateToNextScreenDelayed();
+    }
+
+    private void navigateToNextScreenDelayed() {
+        // Minimal delay for visual splash effect, then transition
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Intent intent;
-            if (sessionManager.isLoggedIn()) {
-                // User is already logged in, go to MainActivity
-                intent = new Intent(SplashActivity.this, MainActivity.class);
-            } else {
-                // User not logged in, go to AuthActivity
-                intent = new Intent(SplashActivity.this, AuthActivity.class);
-            }
-            startActivity(intent);
-            finish();
+            navigateToNextScreen();
         }, SPLASH_DURATION);
+    }
+
+    private void navigateToNextScreen() {
+        Intent intent;
+        if (sessionManager.isLoggedIn()) {
+            intent = new Intent(SplashActivity.this, MainActivity.class);
+        } else {
+            intent = new Intent(SplashActivity.this, AuthActivity.class);
+        }
+        startActivity(intent);
+        finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

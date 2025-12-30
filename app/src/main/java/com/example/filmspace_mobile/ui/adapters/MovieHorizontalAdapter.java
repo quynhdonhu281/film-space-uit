@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Movie;
 
@@ -99,6 +100,7 @@ public class MovieHorizontalAdapter extends RecyclerView.Adapter<MovieHorizontal
         TextView genres;
         ImageView pic;
         ImageView playButton;
+        ShimmerFrameLayout shimmerFrameLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -106,6 +108,19 @@ public class MovieHorizontalAdapter extends RecyclerView.Adapter<MovieHorizontal
             genres = itemView.findViewById(R.id.filmGenres);
             pic = itemView.findViewById(R.id.pic);
             playButton = itemView.findViewById(R.id.playButton);
+            shimmerFrameLayout = (ShimmerFrameLayout) itemView;
+        }
+
+        public void startShimmer() {
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.startShimmer();
+            }
+        }
+
+        public void stopShimmer() {
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.stopShimmer();
+            }
         }
     }
 }

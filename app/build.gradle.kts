@@ -18,14 +18,14 @@ android {
         
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
-        // Use your actual IP (e.g., 10.45.140.58) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"https://supervisors-claimed-conclusions-subsidiaries.trycloudflare.com\"")
+        // Use your actual IP (e.g., 10.0.104.68) for physical device
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.104.68:8080\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"https://supervisors-claimed-conclusions-subsidiaries.trycloudflare.com\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.104.68:8080\"")
         }
         release {
             isMinifyEnabled = true
@@ -35,7 +35,7 @@ android {
                 "proguard-rules.pro"
             )
             // TODO: Update this URL to your production API before release
-            buildConfigField("String", "API_BASE_URL", "\"https://your-production-api.com/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://supervisors-claimed-conclusions-subsidiaries.trycloudflare.com/\"")
         }
     }
     compileOptions {

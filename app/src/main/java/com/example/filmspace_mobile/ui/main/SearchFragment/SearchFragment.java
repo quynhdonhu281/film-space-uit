@@ -1,6 +1,7 @@
 package com.example.filmspace_mobile.ui.main.SearchFragment;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.databinding.FragmentSearchBinding;
@@ -81,6 +83,10 @@ public class SearchFragment extends Fragment {
     }
 
     private void setupSearchView() {
+        TextView searchEditText = binding.searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchEditText.setTextColor(Color.BLACK);
+        searchEditText.setHintTextColor(Color.GRAY);
+
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

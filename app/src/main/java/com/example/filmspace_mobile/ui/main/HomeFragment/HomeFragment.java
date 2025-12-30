@@ -30,6 +30,7 @@ import com.example.filmspace_mobile.ui.movie.MovieDetailActivity;
 import com.example.filmspace_mobile.ui.movie.MoviesByGenreActivity;
 import com.example.filmspace_mobile.viewmodel.GenreViewModel;
 import com.example.filmspace_mobile.viewmodel.MovieViewModel;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.snackbar.Snackbar;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -42,8 +43,6 @@ public class HomeFragment extends Fragment {
     private MovieSliderAdapter sliderAdapter;
     private MovieAdapter recommendedMoviesAdapter;
     private MovieHorizontalAdapter topRatingMoviesAdapter;
-    private GenreAdapter genreAdapter;
-    private MovieAdapter upcomingMoviesAdapter;
 
     // Auto-scroll for ViewPager
     private Handler autoScrollHandler;
@@ -82,8 +81,9 @@ public class HomeFragment extends Fragment {
         setupAutoScroll();
         setupSwipeRefresh();
 
-        // Fetch data from your backend
-        loadData();
+        // Defer heavy data loading until UI is ready - prevents ANR during splash->main transition
+        // Load data asynchronously after layout is complete
+        binding.getRoot().post(this::loadData);
     }
 
     private void setupViewPager() {
@@ -93,7 +93,8 @@ public class HomeFragment extends Fragment {
         binding.viewPager.setAdapter(sliderAdapter);
         binding.viewPager.setClipToPadding(false);
         binding.viewPager.setClipChildren(false);
-        binding.viewPager.setOffscreenPageLimit(3);
+        // Reduce offscreen pages for better performance (1 is optimal for mobile)
+        binding.viewPager.setOffscreenPageLimit(1);
 
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
@@ -103,10 +104,12 @@ public class HomeFragment extends Fragment {
         });
         binding.viewPager.setPageTransformer(compositePageTransformer);
 
-        // Set to middle to enable infinite scroll
+        // Set initial item to a reasonable middle position for infinite scroll effect
         binding.viewPager.post(() -> {
             if (sliderAdapter.getItemCount() > 0) {
-                binding.viewPager.setCurrentItem(Integer.MAX_VALUE / 2, false);
+                // Use middle of adapter's tripled list (e.g., if 50 items, set to item 50)
+                int middlePosition = sliderAdapter.getItemCount() / 2;
+                binding.viewPager.setCurrentItem(middlePosition, false);
             }
         });
 
@@ -148,13 +151,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Recommended Movies - show all movies for now
-        homeViewModel.getAllMovies().observe(getViewLifecycleOwner(), movies -> {
-            if (movies != null && !movies.isEmpty()) {
-                // Don't set the adapter here anymore, use the recommended API instead
-            }
-        });
-
         // Recommended Movies from API
         homeViewModel.getRecommendedMovies().observe(getViewLifecycleOwner(), movies -> {
             if (movies != null && !movies.isEmpty()) {
@@ -178,20 +174,33 @@ public class HomeFragment extends Fragment {
         // Observe loading states from HomeViewModel
         homeViewModel.getMoviesLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading != null) {
-                // Show/hide shimmer and RecyclerViews
+                // Show/hide shimmer for recommended movies
                 binding.shimmerBestMovies.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
                 binding.recommendedMoviesProgressBar.setVisibility(View.GONE);
-                binding.topRatingMoviesProgressBar.setVisibility(View.GONE);
                 binding.recommendedMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                
+                // Show/hide shimmer for top rating movies
+                binding.shimmerTopRatingMovies.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                binding.topRatingMoviesProgressBar.setVisibility(View.GONE);
                 binding.topRatingMoviesRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
                 
-                // Start/stop shimmer animation
+                // Show/hide shimmer for ViewPager
+                binding.shimmerViewPager.getRoot().setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                binding.viewPager.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                
+                // Start/stop shimmer animation for recommended movies
                 if (isLoading) {
                     binding.shimmerBestMovies.shimmerMovies1.startShimmer();
                     binding.shimmerBestMovies.shimmerMovies2.startShimmer();
+                    // Start shimmer for top rating movies
+                    binding.shimmerTopRatingMovies.shimmerMovies1.startShimmer();
+                    binding.shimmerTopRatingMovies.shimmerMovies2.startShimmer();
                 } else {
                     binding.shimmerBestMovies.shimmerMovies1.stopShimmer();
                     binding.shimmerBestMovies.shimmerMovies2.stopShimmer();
+                    // Stop shimmer for top rating movies
+                    binding.shimmerTopRatingMovies.shimmerMovies1.stopShimmer();
+                    binding.shimmerTopRatingMovies.shimmerMovies2.stopShimmer();
                 }
             }
         });
@@ -202,13 +211,21 @@ public class HomeFragment extends Fragment {
                 Snackbar.make(getView(), error, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry, v -> reloadData())
                     .show();
+                // Hide all shimmers
                 binding.shimmerBestMovies.getRoot().setVisibility(View.GONE);
                 binding.shimmerBestMovies.shimmerMovies1.stopShimmer();
                 binding.shimmerBestMovies.shimmerMovies2.stopShimmer();
+                
+                binding.shimmerTopRatingMovies.getRoot().setVisibility(View.GONE);
+                binding.shimmerTopRatingMovies.shimmerMovies1.stopShimmer();
+                binding.shimmerTopRatingMovies.shimmerMovies2.stopShimmer();
+                
+                // Show RecyclerViews and ViewPager
                 binding.recommendedMoviesProgressBar.setVisibility(View.GONE);
                 binding.topRatingMoviesProgressBar.setVisibility(View.GONE);
                 binding.recommendedMoviesRecyclerView.setVisibility(View.VISIBLE);
                 binding.topRatingMoviesRecyclerView.setVisibility(View.VISIBLE);
+                binding.viewPager.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -216,16 +233,6 @@ public class HomeFragment extends Fragment {
     private void openMovieDetail(int movieId) {
         Intent intent = new Intent(getContext(), MovieDetailActivity.class);
         intent.putExtra("movieId", movieId);
-        startActivity(intent);
-        // Add slide animation
-        if (getActivity() != null) {
-            getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        }
-    }
-
-    private void openMoviesByGenre(int genreId) {
-        Intent intent = new Intent(getContext(), MoviesByGenreActivity.class);
-        intent.putExtra("genreId", genreId);
         startActivity(intent);
         // Add slide animation
         if (getActivity() != null) {
@@ -265,15 +272,23 @@ public class HomeFragment extends Fragment {
         autoScrollRunnable = new Runnable() {
             @Override
             public void run() {
-                // Check if view is still created and visible
-                if (isViewCreated && binding != null && sliderAdapter.getItemCount() > 0 
-                    && isResumed() && getUserVisibleHint()) {
-                    int currentItem = binding.viewPager.getCurrentItem();
-                    int nextItem = currentItem + 1;
-                    binding.viewPager.setCurrentItem(nextItem, true);
-                    // Re-schedule only if still active
-                    if (isViewCreated && isResumed()) {
-                        autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+                // Check if view is still created and visible before proceeding
+                if (!isViewCreated || binding == null || sliderAdapter.getItemCount() == 0) {
+                    return;
+                }
+                
+                if (isResumed() && getUserVisibleHint()) {
+                    try {
+                        int currentItem = binding.viewPager.getCurrentItem();
+                        int nextItem = currentItem + 1;
+                        binding.viewPager.setCurrentItem(nextItem, true);
+                        // Re-schedule only if still active
+                        if (isViewCreated && isResumed() && autoScrollHandler != null) {
+                            autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+                        }
+                    } catch (Exception e) {
+                        // Silently ignore any exceptions to prevent crashes
+                        android.util.Log.e("HomeFragment", "Auto-scroll error", e);
                     }
                 }
             }
@@ -281,8 +296,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void startAutoScroll() {
-        if (autoScrollHandler != null && autoScrollRunnable != null && isViewCreated) {
-            // Remove any pending callbacks first
+        if (autoScrollHandler != null && autoScrollRunnable != null && isViewCreated && sliderAdapter.getItemCount() > 0) {
+            // Remove any pending callbacks first to prevent multiple scheduled callbacks
             autoScrollHandler.removeCallbacks(autoScrollRunnable);
             autoScrollHandler.postDelayed(autoScrollRunnable, AUTO_SCROLL_DELAY);
         }
@@ -332,7 +347,6 @@ public class HomeFragment extends Fragment {
 
     private void loadData() {
         homeViewModel.loadMovies();
-        homeViewModel.loadGenres();
         homeViewModel.loadRecommendedMovies();
     }
 
@@ -344,7 +358,6 @@ public class HomeFragment extends Fragment {
         
         // Reload data
         homeViewModel.loadMovies();
-        homeViewModel.loadGenres();
         homeViewModel.loadRecommendedMovies();
         
         // Hide refresh indicator after a short delay using lifecycle-aware approach

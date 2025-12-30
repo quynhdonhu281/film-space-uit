@@ -2,6 +2,7 @@ package com.example.filmspace_mobile.ui.movie;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -38,10 +39,12 @@ public class MovieDetailActivity extends AppCompatActivity {
     private ImageView moviePoster;
     private ImageButton btnBack;
     private TextView movieTitle;
+    private TextView movieReleaseYear;
     private MaterialButton btnPlay;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private ProgressBar progressBar;
+    private static final String TAG = "MovieDetailActivity";
 
     private Movie movie;
     private int currentMovieId = -1;
@@ -64,8 +67,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         initViews();        
         setupClickListeners();
-        
-        // Check if we have saved movie data
+
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_MOVIE_ID)) {
             currentMovieId = savedInstanceState.getInt(KEY_MOVIE_ID, -1);
         }
@@ -85,6 +87,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         moviePoster = findViewById(R.id.moviePoster);
         btnBack = findViewById(R.id.btnBack);
         movieTitle = findViewById(R.id.movieTitle);
+        movieReleaseYear = findViewById(R.id.movieReleaseYear);
         btnPlay = findViewById(R.id.btnPlay);
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
@@ -96,7 +99,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         int movieId = currentMovieId;
 
         if (movieId == -1) {
-            movieId = getIntent().getIntExtra("movieId", -1);
+            movieId = getIntent().getIntExtra(KEY_MOVIE_ID, -1);
         }
         
         if (movieId == -1) {
@@ -119,9 +122,9 @@ public class MovieDetailActivity extends AppCompatActivity {
         tabLayout.setVisibility(View.GONE);
 
         // Add to watch history if user is logged in
-        if (sessionManager.isLoggedIn()) {
-            addToWatchHistory(movieId);
-        }
+        // if (sessionManager.isLoggedIn()) {
+        //     addToWatchHistory(movieId);
+        // }
 
         // Fetch movie details from API
         movieRepository.getMovieById(movieId, new RepositoryCallback<Movie>() {
@@ -157,22 +160,23 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void addToWatchHistory(int movieId) {
-        historyRepository.addToHistory(movieId, new RepositoryCallback<Void>() {
-            @Override
-            public void onSuccess(Void data) {
-                // Silently added to history
-            }
-
-            @Override
-            public void onError(String error) {
-                // Silently fail - don't disturb user experience
-            }
-        });
-    }
+//    private void addToWatchHistory(int movieId) {
+//        historyRepository.addToHistory(movieId, new RepositoryCallback<Void>() {
+//            @Override
+//            public void onSuccess(Void data) {
+//                // Silently added to history
+//            }
+//
+//            @Override
+//            public void onError(String error) {
+//                // Silently fail - don't disturb user experience
+//            }
+//        });
+//    }
 
     private void displayMovieInfo() {
         movieTitle.setText(movie.getTitle());
+        movieReleaseYear.setText(String.valueOf(movie.getReleaseDate()));
 
         // Load poster image with Glide, handle empty/null URL
         String posterUrl = movie.getPosterUrl();
@@ -234,6 +238,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             // Navigate to video player activity
             Intent intent = new Intent(this, VideoPlayerActivity.class);
             intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, movie.getId());
+            Log.d("TAG ABABC", "Episode ID: " + movie.getId());
             intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, movie.getTitle());
             startActivity(intent);
         });

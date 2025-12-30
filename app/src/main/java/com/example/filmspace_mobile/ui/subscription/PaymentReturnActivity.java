@@ -111,7 +111,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
      * Xử lý khi payment thành công
      */
     private void handlePaymentSuccess(PaymentVerifyResponse response) {
-        Log.d(TAG, "Payment success for user: " + response.getUserId());
+//        Log.d(TAG, "Payment success for user: " + response.getUserId());
 
         // Lưu thông tin premium vào SharedPreferences
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
