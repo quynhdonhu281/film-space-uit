@@ -32,7 +32,7 @@ public class Episode {
     private boolean isPremium;
 
     public Episode(int id, int episodeNumber, String title, String description,
-                   String videoUrl, int duration, String releaseDate) {
+                   String videoUrl, int duration, String releaseDate, boolean isPremium, int movieId) {
         this.id = id;
         this.movieId = movieId;
         this.episodeNumber = episodeNumber;
@@ -41,7 +41,7 @@ public class Episode {
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.releaseDate = releaseDate;
-        this.isPremium = false;
+        this.isPremium = isPremium;
     }
 
     public Episode() {

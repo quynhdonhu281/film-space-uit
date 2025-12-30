@@ -85,7 +85,7 @@ public class MovieEpisodeFragment extends Fragment {
             intent.putExtra(VideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
             intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, "Stranger Things"); // TODO: Get actual movie title
             startActivity(intent);
-        });
+        }, userIsPremium);
 
         rvEpisodes.setAdapter(episodeAdapter);
     }
@@ -106,17 +106,21 @@ public class MovieEpisodeFragment extends Fragment {
         
         if (movie == null) {
             showEmptyState(true);
+            Toast.makeText(getContext(), "Unable to load movie data", Toast.LENGTH_SHORT).show();
             return;
         }
         
-        // Load episodes from movie object
+        // Load episodes from movie object (from get movie by id response)
         List<Episode> episodes = movie.getEpisodes();
         if (episodes != null && !episodes.isEmpty()) {
             episodeAdapter.updateData(episodes);
             showEmptyState(false);
         } else {
-            // No episodes available - show empty state instead of toast
+            // No episodes available - show empty state
             showEmptyState(true);
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "No episodes available", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

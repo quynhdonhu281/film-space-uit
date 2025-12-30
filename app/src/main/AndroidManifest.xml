@@ -28,7 +28,7 @@
 
         <!-- ==================== MAIN ACTIVITY (LAUNCHER) ==================== -->
         <activity
-            android:name=".ui.test.TestLauncherActivity"
+            android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar">
@@ -86,10 +86,10 @@
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <!-- ==================== TEST LAUNCHER - Direct Movie Detail (Disabled) ==================== -->
-        <activity
+        <!-- <activity
             android:name=".ui.movie.TestMovieDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" /> -->
 
         <!-- ==================== ONBOARDING (OPTIONAL) ==================== -->
         <activity

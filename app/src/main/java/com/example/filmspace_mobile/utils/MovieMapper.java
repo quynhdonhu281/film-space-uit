@@ -24,7 +24,7 @@ public class MovieMapper {
                 movie.getTitle(),
                 movie.getOverview(),
                 movie.getPosterUrl(),
-                movie.getBackdropUrl(),
+                // movie.getBackdropUrl(),
                 movie.getRating(),
                 movie.getReleaseDate(),
                 movie.getGenres(),
@@ -45,7 +45,7 @@ public class MovieMapper {
         movie.setTitle(entity.getTitle());
         movie.setOverview(entity.getOverview());
         movie.setPosterUrl(entity.getPosterUrl());
-        movie.setBackdropUrl(entity.getBackdropUrl());
+        // movie.setBackdropUrl(entity.getBackdropUrl());
         movie.setRating(entity.getRating());
         movie.setReleaseDate(entity.getReleaseDate());
         movie.setGenres(entity.getGenres());

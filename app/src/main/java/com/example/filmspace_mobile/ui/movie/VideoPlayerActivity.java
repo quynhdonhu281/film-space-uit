@@ -310,14 +310,14 @@ public class VideoPlayerActivity extends AppCompatActivity {
         // Fallback data for testing when API is not available
         episodeList.clear();
 
-        episodeList.add(new Episode(1, 1,
-                "Episode 1", "", "", 49, "2016-07-15"));
-
-        episodeList.add(new Episode(2, 2,
-                "Episode 2", "", "", 56, "2016-07-15"));
-
-        episodeList.add(new Episode(3, 3,
-                "Episode 3", "", "", 52, "2016-07-15"));
+//        episodeList.add(new Episode(1, 1,
+//                "Episode 1", "", "", 49, "2016-07-15"));
+//
+//        episodeList.add(new Episode(2, 2,
+//                "Episode 2", "", "", 56, "2016-07-15"));
+//
+//        episodeList.add(new Episode(3, 3,
+//                "Episode 3", "", "", 52, "2016-07-15"));
 
         if (episodeAdapter != null) {
             episodeAdapter.updateEpisodes(episodeList);

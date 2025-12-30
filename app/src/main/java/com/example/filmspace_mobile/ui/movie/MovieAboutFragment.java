@@ -102,16 +102,28 @@ public class MovieAboutFragment extends Fragment {
             return;
         }
         
+        // Get movie from parent activity if not already set
+        if (movie == null && getActivity() instanceof MovieDetailActivity) {
+            movie = ((MovieDetailActivity) getActivity()).getMovie();
+        }
+        
         if (movie != null) {
-            // Display story line
-            tvStoryLine.setText(movie.getOverview());
+            // Display story line/description from movie response
+            String description = movie.getOverview();
+            if (description != null && !description.isEmpty()) {
+                tvStoryLine.setText(description);
+            } else {
+                tvStoryLine.setText("No description available");
+            }
 
-            // Load cast
+            // Load cast from movie response (includes castList from API)
             if (movie.getCastList() != null && !movie.getCastList().isEmpty()) {
                 castAdapter.updateData(movie.getCastList());
             } else {
-                // Load dummy data for testing
-                loadDummyCast();
+                // Show empty state
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "No cast information available", Toast.LENGTH_SHORT).show();
+                }
             }
         } else {
             // Load dummy data for testing

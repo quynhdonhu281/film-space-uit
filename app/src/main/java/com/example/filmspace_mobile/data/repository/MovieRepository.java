@@ -86,6 +86,17 @@ public class MovieRepository {
         apiService.getMovieById(movieId).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
+                // if (BuildConfig.DEBUG) {
+                //     android.util.Log.d(TAG, "getMovieById response code: " + response.code());
+                //     android.util.Log.d(TAG, "getMovieById response body is null: " + (response.body() == null));
+                //     try {
+                //         if (response.errorBody() != null) {
+                //             android.util.Log.d(TAG, "Error body: " + response.errorBody().string());
+                //         }
+                //     } catch (Exception e) {
+                //         android.util.Log.e(TAG, "Error reading error body", e);
+                //     }
+                // }
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());
                 } else {
@@ -96,6 +107,7 @@ public class MovieRepository {
 
             @Override
             public void onFailure(Call<Movie> call, Throwable t) {
+                android.util.Log.e(TAG, "getMovieById request failed", t);
                 String errorMessage = getNetworkErrorMessage(t);
                 callback.onError(errorMessage);
             }

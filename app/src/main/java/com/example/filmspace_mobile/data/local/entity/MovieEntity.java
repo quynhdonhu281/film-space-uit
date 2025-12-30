@@ -22,9 +22,9 @@ public class MovieEntity {
     private String title;
     private String overview;
     private String posterUrl;
-    private String backdropUrl;
+    // private String backdropUrl;
     private double rating;
-    private String releaseDate;
+    private int releaseDate;
     private long cachedAt; // Timestamp for cache invalidation
     
     // Store genres as JSON string
@@ -36,13 +36,13 @@ public class MovieEntity {
 
     @Ignore
     public MovieEntity(int id, String title, String overview, String posterUrl, 
-                      String backdropUrl, double rating, String releaseDate, 
+                      double rating, int releaseDate, 
                       List<Genre> genres, long cachedAt) {
         this.id = id;
         this.title = title;
         this.overview = overview;
         this.posterUrl = posterUrl;
-        this.backdropUrl = backdropUrl;
+        // this.backdropUrl = backdropUrl;
         this.rating = rating;
         this.releaseDate = releaseDate;
         this.genres = genres;
@@ -82,13 +82,13 @@ public class MovieEntity {
         this.posterUrl = posterUrl;
     }
 
-    public String getBackdropUrl() {
-        return backdropUrl;
-    }
+    // public String getBackdropUrl() {
+    //     return backdropUrl;
+    // }
 
-    public void setBackdropUrl(String backdropUrl) {
-        this.backdropUrl = backdropUrl;
-    }
+    // public void setBackdropUrl(String backdropUrl) {
+    //     this.backdropUrl = backdropUrl;
+    // }
 
     public double getRating() {
         return rating;
@@ -98,11 +98,11 @@ public class MovieEntity {
         this.rating = rating;
     }
 
-    public String getReleaseDate() {
+    public int getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(int releaseDate) {
         this.releaseDate = releaseDate;
     }
 

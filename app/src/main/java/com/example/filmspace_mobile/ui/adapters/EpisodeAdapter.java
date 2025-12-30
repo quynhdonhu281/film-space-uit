@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Episode;
@@ -47,8 +48,41 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     }
 
     public void updateData(List<Episode> newEpisodeList) {
-        this.episodeList = newEpisodeList;
-        notifyDataSetChanged();
+        // this.episodeList = newEpisodeList;
+        // notifyDataSetChanged();
+        final List<Episode> finalNewList = newEpisodeList != null ? newEpisodeList : new java.util.ArrayList<>();
+        
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return episodeList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return finalNewList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                Episode oldEpisode = episodeList.get(oldItemPosition);
+                Episode newEpisode = finalNewList.get(newItemPosition);
+                return oldEpisode.getId() == newEpisode.getId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Episode oldEpisode = episodeList.get(oldItemPosition);
+                Episode newEpisode = finalNewList.get(newItemPosition);
+                return oldEpisode.getId() == newEpisode.getId() &&
+                        oldEpisode.getTitle().equals(newEpisode.getTitle()) &&
+                        oldEpisode.getDuration() == newEpisode.getDuration() &&
+                        oldEpisode.isPremium() == newEpisode.isPremium();
+            }
+        });
+        
+        this.episodeList = finalNewList;
+        diffResult.dispatchUpdatesTo(this);
     }
 
     class EpisodeViewHolder extends RecyclerView.ViewHolder {

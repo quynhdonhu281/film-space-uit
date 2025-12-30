@@ -11,7 +11,7 @@ public class Movie implements Serializable {
     private int id;
     private String title;
     private String posterUrl;
-    private String backdropUrl;
+    // private String backdropUrl; // ?
     
     @SerializedName("description")
     private String overview;
@@ -19,13 +19,13 @@ public class Movie implements Serializable {
     private String director;
     
     @SerializedName("releaseYear")
-    private String releaseDate;
+    private int releaseYear;
     
-    private int seasonCount;
-    private int episodeCount;
+    // private int seasonCount; // không có
+    // private int episodeCount; // không có
     private int reviewCount;
     
-    private String genre;  // Giữ lại cho backward compatibility
+    // private String genre;  // Giữ lại cho backward compatibility --> không có
     private List<Genre> genres;  // ĐỔI: từ List<String> thành List<Genre>
     private double rating;
     
@@ -39,18 +39,17 @@ public class Movie implements Serializable {
     public Movie() {}
 
     // Constructor đầy đủ
-    public Movie(int id, String title, String posterUrl, String backdropUrl,
-                 String overview, String releaseDate, int seasonCount,
-                 int episodeCount, String genre, double rating) {
+    public Movie(int id, String title, String posterUrl,
+                 String overview, int releaseYear, double rating) {
         this.id = id;
         this.title = title;
         this.posterUrl = posterUrl;
-        this.backdropUrl = backdropUrl;
+        // this.backdropUrl = backdropUrl;
         this.overview = overview;
-        this.releaseDate = releaseDate;
-        this.seasonCount = seasonCount;
-        this.episodeCount = episodeCount;
-        this.genre = genre;
+        this.releaseYear = releaseYear;
+        // this.seasonCount = seasonCount;
+        // this.episodeCount = episodeCount;
+        // this.genre = genre;
         this.rating = rating;
     }
 
@@ -79,13 +78,13 @@ public class Movie implements Serializable {
         this.posterUrl = posterUrl;
     }
 
-    public String getBackdropUrl() {
-        return backdropUrl;
-    }
+    // public String getBackdropUrl() {
+    //     return backdropUrl;
+    // }
 
-    public void setBackdropUrl(String backdropUrl) {
-        this.backdropUrl = backdropUrl;
-    }
+    // public void setBackdropUrl(String backdropUrl) {
+    //     this.backdropUrl = backdropUrl;
+    // }
 
     public String getOverview() {
         return overview;
@@ -95,37 +94,37 @@ public class Movie implements Serializable {
         this.overview = overview;
     }
 
-    public String getReleaseDate() {
-        return releaseDate;
+    public int getReleaseDate() {
+        return releaseYear;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+    public void setReleaseDate(int releaseYear) {
+        this.releaseYear = releaseYear;
     }
 
-    public int getSeasonCount() {
-        return seasonCount;
-    }
+    // public int getSeasonCount() {
+    //     return seasonCount;
+    // }
 
-    public void setSeasonCount(int seasonCount) {
-        this.seasonCount = seasonCount;
-    }
+    // public void setSeasonCount(int seasonCount) {
+    //     this.seasonCount = seasonCount;
+    // }
 
-    public int getEpisodeCount() {
-        return episodeCount;
-    }
+    // public int getEpisodeCount() {
+    //     return episodeCount;
+    // }
 
-    public void setEpisodeCount(int episodeCount) {
-        this.episodeCount = episodeCount;
-    }
+    // public void setEpisodeCount(int episodeCount) {
+    //     this.episodeCount = episodeCount;
+    // }
 
-    public String getGenre() {
-        return genre;
-    }
+    // public String getGenre() {
+    //     return genre;
+    // }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
+    // public void setGenre(String genre) {
+    //     this.genre = genre;
+    // }
 
     // Getter/Setter cho genres (List<Genre>)
     public List<Genre> getGenres() {
@@ -175,7 +174,7 @@ public class Movie implements Serializable {
     public void setEpisodes(List<Episode> episodes) {
         this.episodes = episodes;
         // Auto-calculate episode count
-        this.episodeCount = episodes != null ? episodes.size() : 0;
+        // this.episodeCount = episodes != null ? episodes.size() : 0;
     }
 
     public List<Review> getReviews() {

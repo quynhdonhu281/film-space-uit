@@ -28,27 +28,37 @@ public class EpisodeDeserializer implements JsonDeserializer<Episode> {
             episode.setEpisodeNumber(jsonObject.get("episodeNumber").getAsInt());
         }
         if (jsonObject.has("title")) {
-            episode.setTitle(jsonObject.get("title").getAsString());
+            if (!jsonObject.get("title").isJsonNull()) {
+                episode.setTitle(jsonObject.get("title").getAsString());
+            }
         }
         if (jsonObject.has("description")) {
-            episode.setOverview(jsonObject.get("description").getAsString());
+            if (!jsonObject.get("description").isJsonNull()) {
+                episode.setDescription(jsonObject.get("description").getAsString());
+            }
         }
         if (jsonObject.has("duration")) {
             episode.setDuration(jsonObject.get("duration").getAsInt());
         }
         if (jsonObject.has("releaseDate")) {
-            episode.setAirDate(jsonObject.get("releaseDate").getAsString());
+            if (!jsonObject.get("releaseDate").isJsonNull()) {
+                episode.setReleaseDate(jsonObject.get("releaseDate").getAsString());
+            }
         }
         
         // Handle URL fields with CloudFront prefix
-        if (jsonObject.has("thumbnailUrl") && !jsonObject.get("thumbnailUrl").isJsonNull()) {
-            String thumbnailUrl = jsonObject.get("thumbnailUrl").getAsString();
-            episode.setThumbnailUrl(CloudFrontUrlHelper.prependCloudFrontUrl(thumbnailUrl));
-        }
+        // if (jsonObject.has("thumbnailUrl") && !jsonObject.get("thumbnailUrl").isJsonNull()) {
+        //     String thumbnailUrl = jsonObject.get("thumbnailUrl").getAsString();
+        //     episode.setThumbnailUrl(CloudFrontUrlHelper.prependCloudFrontUrl(thumbnailUrl));
+        // }
         if (jsonObject.has("videoUrl") && !jsonObject.get("videoUrl").isJsonNull()) {
             String videoUrl = jsonObject.get("videoUrl").getAsString();
             episode.setVideoUrl(CloudFrontUrlHelper.prependCloudFrontUrl(videoUrl));
         }
+
+        if (jsonObject.has("isPremium")) {
+            episode.setPremium(jsonObject.get("isPremium").getAsBoolean());
+        }        
         
         return episode;
     }

@@ -37,33 +37,37 @@ public class MovieDeserializer implements JsonDeserializer<Movie> {
             String posterUrl = jsonObject.get("posterUrl").getAsString();
             movie.setPosterUrl(CloudFrontUrlHelper.prependCloudFrontUrl(posterUrl));
         }
-        if (jsonObject.has("backdropUrl") && !jsonObject.get("backdropUrl").isJsonNull()) {
-            String backdropUrl = jsonObject.get("backdropUrl").getAsString();
-            movie.setBackdropUrl(CloudFrontUrlHelper.prependCloudFrontUrl(backdropUrl));
-        }
+        // if (jsonObject.has("backdropUrl") && !jsonObject.get("backdropUrl").isJsonNull()) {
+        //     String backdropUrl = jsonObject.get("backdropUrl").getAsString();
+        //     movie.setBackdropUrl(CloudFrontUrlHelper.prependCloudFrontUrl(backdropUrl));
+        // }
         
         // Deserialize other fields
         if (jsonObject.has("description")) {
-            movie.setOverview(jsonObject.get("description").getAsString());
+            if (!jsonObject.get("description").isJsonNull()) {
+                movie.setOverview(jsonObject.get("description").getAsString());
+            }
         }
         if (jsonObject.has("director")) {
-            movie.setDirector(jsonObject.get("director").getAsString());
+            if (!jsonObject.get("director").isJsonNull()) {
+                movie.setDirector(jsonObject.get("director").getAsString());
+            }
         }
         if (jsonObject.has("releaseYear")) {
-            movie.setReleaseDate(jsonObject.get("releaseYear").getAsString());
+            movie.setReleaseDate(jsonObject.get("releaseYear").getAsInt());
         }
-        if (jsonObject.has("seasonCount")) {
-            movie.setSeasonCount(jsonObject.get("seasonCount").getAsInt());
-        }
-        if (jsonObject.has("episodeCount")) {
-            movie.setEpisodeCount(jsonObject.get("episodeCount").getAsInt());
-        }
+        // if (jsonObject.has("seasonCount")) {
+        //     movie.setSeasonCount(jsonObject.get("seasonCount").getAsInt());
+        // }
+        // if (jsonObject.has("episodeCount")) {
+        //     movie.setEpisodeCount(jsonObject.get("episodeCount").getAsInt());
+        // }
         if (jsonObject.has("reviewCount")) {
             movie.setReviewCount(jsonObject.get("reviewCount").getAsInt());
         }
-        if (jsonObject.has("genre")) {
-            movie.setGenre(jsonObject.get("genre").getAsString());
-        }
+        // if (jsonObject.has("genre")) {
+        //     movie.setGenre(jsonObject.get("genre").getAsString());
+        // }
         if (jsonObject.has("rating")) {
             movie.setRating(jsonObject.get("rating").getAsDouble());
         }
