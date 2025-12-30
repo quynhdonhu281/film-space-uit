@@ -1,5 +1,6 @@
 package com.example.filmspace_mobile.ui.movie;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,14 +79,13 @@ public class MovieEpisodeFragment extends Fragment {
         boolean userIsPremium = sessionManager.isPremium();
 
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
-            // Handle episode click - play video
-            if (getContext() != null) {
-                Toast.makeText(getContext(),
-                        "Play: " + episode.getTitle(),
-                        Toast.LENGTH_SHORT).show();
-            }
-            // TODO: Navigate to video player
-        }, userIsPremium);
+            // Handle episode click - navigate to video player
+            Intent intent = new Intent(getContext(), VideoPlayerActivity.class);
+            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, 1); // TODO: Get actual movie ID
+            intent.putExtra(VideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
+            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, "Stranger Things"); // TODO: Get actual movie title
+            startActivity(intent);
+        });
 
         rvEpisodes.setAdapter(episodeAdapter);
     }

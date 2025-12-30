@@ -2,43 +2,49 @@ package com.example.filmspace_mobile.data.model.movie;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
+public class Episode {
 
-public class Episode implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("movieId")
     private int movieId;
+
+    @SerializedName("episodeNumber")
     private int episodeNumber;
+
+    @SerializedName("title")
     private String title;
-    
+
     @SerializedName("description")
-    private String overview;
-    
-    private String thumbnailUrl;
-    private int duration; // in minutes
+    private String description;
+
+    @SerializedName("duration")
+    private int duration;
+
+    @SerializedName("videoUrl")
     private String videoUrl;
-    private boolean isPremium;
-    
+
     @SerializedName("releaseDate")
-    private String airDate;
+    private String releaseDate;
 
-    // Constructor rỗng
-    public Episode() {}
+    @SerializedName("isPremium")
+    private boolean isPremium;
 
-    // Constructor đầy đủ
-    public Episode(int id, int movieId, int episodeNumber, String title, String overview,
-                   String thumbnailUrl, int duration, String videoUrl, String airDate, boolean isPremium) {
+    public Episode(int id, int episodeNumber, String title, String description,
+                   String videoUrl, int duration, String releaseDate) {
         this.id = id;
         this.movieId = movieId;
         this.episodeNumber = episodeNumber;
         this.title = title;
-        this.overview = overview;
-        this.thumbnailUrl = thumbnailUrl;
-        this.duration = duration;
+        this.description = description;
         this.videoUrl = videoUrl;
-        this.airDate = airDate;
-        this.isPremium = isPremium;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.isPremium = false;
+    }
+
+    public Episode() {
     }
 
     // Getters and Setters
@@ -48,6 +54,14 @@ public class Episode implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public int getEpisodeNumber() {
@@ -66,20 +80,12 @@ public class Episode implements Serializable {
         this.title = title;
     }
 
-    public String getOverview() {
-        return overview;
+    public String getDescription() {
+        return description;
     }
 
-    public void setOverview(String overview) {
-        this.overview = overview;
-    }
-
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getDuration() {
@@ -90,28 +96,20 @@ public class Episode implements Serializable {
         this.duration = duration;
     }
 
-    public String getAirDate() {
-        return airDate;
-    }
-
-    public void setAirDate(String airDate) {
-        this.airDate = airDate;
-    }
-
-    public int getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
-    }
-
     public String getVideoUrl() {
         return videoUrl;
     }
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     public boolean isPremium() {
@@ -121,4 +119,19 @@ public class Episode implements Serializable {
     public void setPremium(boolean premium) {
         isPremium = premium;
     }
+
+    public String getFormattedDuration() {
+        int hours = duration / 60;
+        int minutes = duration % 60;
+
+        if (hours > 0) {
+            return String.format("%dh %dm", hours, minutes);
+        } else {
+            return String.format("%dm", minutes);
+        }
+    }
+    public String getOverview() {
+        return description;
+    }
+
 }

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Video Container - Sẽ thay đổi kích thước dựa trên fullscreen mode -->
+    <FrameLayout
+        android:id="@+id/videoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/black">
+
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Loading Progress -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <!-- Video Controls Overlay -->
+        <RelativeLayout
+            android:id="@+id/videoControlsOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:visibility="visible">
+
+            <!-- Top Bar -->
+            <LinearLayout
+                android:id="@+id/topBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_back"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Back"/>
+
+                <TextView
+                    android:id="@+id/tvVideoTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="Video Title"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
+
+            </LinearLayout>
+
+            <!-- Center Play Controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/btnRewind"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_rewind_10"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="24dp"
+                    android:contentDescription="Rewind 10 seconds"/>
+
+                <ImageButton
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_pause"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Play/Pause"/>
+
+                <ImageButton
+                    android:id="@+id/btnForward"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_forward_10"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginStart="24dp"
+                    android:contentDescription="Forward 10 seconds"/>
+            </LinearLayout>
+
+            <!-- Bottom Controls (SeekBar + Fullscreen) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- SeekBar Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvCurrentTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"
+                        android:minWidth="50dp"/>
+
+                    <SeekBar
+                        android:id="@+id/seekBar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="8dp"
+                        android:progressTint="@color/color_main"
+                        android:thumbTint="@color/color_main"/>
+
+                    <TextView
+                        android:id="@+id/tvTotalTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"
+                        android:minWidth="50dp"
+                        android:gravity="end"/>
+                </LinearLayout>
+
+                <!-- Fullscreen Button Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"
+                    android:gravity="end">
+
+                    <ImageButton
+                        android:id="@+id/btnFullscreen"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_fullscreen"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Fullscreen"/>
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </FrameLayout>
+
+    <!-- Episodes List Container - Chỉ hiển thị khi KHÔNG fullscreen -->
+    <LinearLayout
+        android:id="@+id/episodesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/videoContainer"
+        android:orientation="vertical"
+        android:background="@android:color/white">
+
+        <!-- Season Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvSeasonTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Season 1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"/>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_arrow_down"
+                android:contentDescription="Dropdown"/>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"/>
+
+        <!-- Episodes RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvEpisodes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:clipToPadding="false"/>
+    </LinearLayout>
+
+</RelativeLayout>

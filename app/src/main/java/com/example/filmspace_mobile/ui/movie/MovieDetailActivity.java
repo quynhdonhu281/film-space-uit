@@ -1,5 +1,6 @@
 package com.example.filmspace_mobile.ui.movie;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -230,14 +231,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnPlay.setOnClickListener(v -> {
-            // TODO: Navigate to video player activity
-            View rootView = findViewById(android.R.id.content);
-            if (rootView != null) {
-                Snackbar.make(rootView, R.string.opening_video_player, Snackbar.LENGTH_SHORT).show();
-            }
-            // Intent intent = new Intent(this, VideoPlayerActivity.class);
-            // intent.putExtra("MOVIE_ID", movie.getId());
-            // startActivity(intent);
+            // Navigate to video player activity
+            Intent intent = new Intent(this, VideoPlayerActivity.class);
+            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, movie.getId());
+            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, movie.getTitle());
+            startActivity(intent);
         });
     }
 
