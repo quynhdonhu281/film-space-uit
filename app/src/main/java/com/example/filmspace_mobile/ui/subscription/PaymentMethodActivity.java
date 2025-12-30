@@ -35,15 +35,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
     private TextView tvTotal;
 
     private CardView cardVNPayQR;
-    private CardView cardVNPayWallet;
-    private CardView cardATM;
-    private CardView cardCreditCard;
-
     private RadioButton radioVNPayQR;
-    private RadioButton radioVNPayWallet;
-    private RadioButton radioATM;
-    private RadioButton radioCreditCard;
-
     private Button btnPay;
 
     private String planId;
@@ -58,112 +50,123 @@ public class PaymentMethodActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_payment_method);
+        
+        try {
+            setContentView(R.layout.activity_payment_method);
 
-        // Initialize Retrofit API Service
-        paymentApiService = RetrofitClient.getPaymentApiService();
+            paymentApiService = RetrofitClient.getPaymentApiService();
 
-        getIntentData();
-        initViews();
-        displayPlanInfo();
-        setupListeners();
+            getIntentData();
+            initViews();
+            displayPlanInfo();
+            setupListeners();
+            
+            Log.d(TAG, "PaymentMethodActivity created successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onCreate", e);
+            Toast.makeText(this, "Error loading payment page: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     private void getIntentData() {
-        Intent intent = getIntent();
-        planId = intent.getStringExtra("plan_id");
-        planName = intent.getStringExtra("plan_name");
-        planPrice = intent.getDoubleExtra("plan_price", 39000);
-        planType = intent.getStringExtra("plan_type");
-        planSavings = intent.getIntExtra("plan_savings", 0);
+        try {
+            Intent intent = getIntent();
+            planId = intent.getStringExtra("plan_id");
+            planName = intent.getStringExtra("plan_name");
+            planPrice = intent.getDoubleExtra("plan_price", 99000); // Default 99k
+            planType = intent.getStringExtra("plan_type");
+            planSavings = intent.getIntExtra("plan_savings", 0);
+            
+            // Set defaults if null
+            if (planId == null) planId = "lifetime";
+            if (planName == null) planName = "Lifetime Premium";
+            if (planType == null) planType = "lifetime";
+            
+            Log.d(TAG, "Intent data - Plan: " + planName + ", Price: " + planPrice);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting intent data", e);
+            // Set default values
+            planId = "lifetime";
+            planName = "Lifetime Premium";
+            planPrice = 99000;
+            planType = "lifetime";
+            planSavings = 0;
+        }
     }
 
     private void initViews() {
-        backIcon = findViewById(R.id.backIcon);
-        tvSelectedPlan = findViewById(R.id.tvSelectedPlan);
-        tvPlanDetails = findViewById(R.id.tvPlanDetails);
-        tvSubscriptionFee = findViewById(R.id.tvSubscriptionFee);
-        tvTaxFee = findViewById(R.id.tvTaxFee);
-        tvTotal = findViewById(R.id.tvTotal);
+        try {
+            backIcon = findViewById(R.id.backIcon);
+            tvSelectedPlan = findViewById(R.id.tvSelectedPlan);
+            tvPlanDetails = findViewById(R.id.tvPlanDetails);
+            tvSubscriptionFee = findViewById(R.id.tvSubscriptionFee);
+            tvTaxFee = findViewById(R.id.tvTaxFee);
+            tvTotal = findViewById(R.id.tvTotal);
 
-        cardVNPayQR = findViewById(R.id.cardVNPayQR);
-
-        radioVNPayQR = findViewById(R.id.radioVNPayQR);
-
-        btnPay = findViewById(R.id.btnPay);
+            cardVNPayQR = findViewById(R.id.cardVNPayQR);
+            radioVNPayQR = findViewById(R.id.radioVNPayQR);
+            btnPay = findViewById(R.id.btnPay);
+            
+            Log.d(TAG, "All views initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing views", e);
+            Toast.makeText(this, "Error loading payment page", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void displayPlanInfo() {
-        tvSelectedPlan.setText(planName);
+        try {
+            if (planName == null || planName.isEmpty()) {
+                planName = "Lifetime Premium";
+            }
+            
+            tvSelectedPlan.setText(planName);
+            tvPlanDetails.setText("One-time payment - Lifetime access");
 
-        if (planSavings > 0) {
-            tvPlanDetails.setText("You save over " + planSavings + "%");
-        } else {
-            tvPlanDetails.setText("Billed monthly");
+            double taxFee = planPrice * 0.1;
+            double total = planPrice + taxFee;
+
+            NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+            tvSubscriptionFee.setText(formatter.format(planPrice) + " ₫");
+            tvTaxFee.setText(formatter.format(taxFee) + " ₫");
+            tvTotal.setText(formatter.format(total) + " ₫");
+            
+            Log.d(TAG, "Plan info displayed: " + planName + ", Price: " + planPrice);
+        } catch (Exception e) {
+            Log.e(TAG, "Error displaying plan info", e);
+            Toast.makeText(this, "Error loading plan information", Toast.LENGTH_SHORT).show();
         }
-
-        double taxFee = planPrice * 0.1;
-        double total = planPrice + taxFee;
-
-        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-
-        tvSubscriptionFee.setText(formatter.format(planPrice) + " ₫");
-        tvTaxFee.setText(formatter.format(taxFee) + " ₫");
-        tvTotal.setText(formatter.format(total) + " ₫");
     }
 
     private void setupListeners() {
         backIcon.setOnClickListener(v -> finish());
 
-        cardVNPayQR.setOnClickListener(v -> selectPaymentMethod("vnpay_qr", radioVNPayQR));
-        cardVNPayWallet.setOnClickListener(v -> selectPaymentMethod("vnpay_wallet", radioVNPayWallet));
-        cardATM.setOnClickListener(v -> selectPaymentMethod("atm", radioATM));
-        cardCreditCard.setOnClickListener(v -> selectPaymentMethod("credit_card", radioCreditCard));
+        cardVNPayQR.setOnClickListener(v -> {
+            radioVNPayQR.setChecked(true);
+            selectedPaymentMethod = "vnpay_qr";
+        });
 
         radioVNPayQR.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) selectPaymentMethod("vnpay_qr", radioVNPayQR);
-        });
-
-        radioVNPayWallet.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) selectPaymentMethod("vnpay_wallet", radioVNPayWallet);
-        });
-
-        radioATM.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) selectPaymentMethod("atm", radioATM);
-        });
-
-        radioCreditCard.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) selectPaymentMethod("credit_card", radioCreditCard);
+            if (isChecked) selectedPaymentMethod = "vnpay_qr";
         });
 
         btnPay.setOnClickListener(v -> processPayment());
-    }
-
-    private void selectPaymentMethod(String method, RadioButton selectedRadio) {
-        selectedPaymentMethod = method;
-
-        radioVNPayQR.setChecked(false);
-        radioVNPayWallet.setChecked(false);
-        radioATM.setChecked(false);
-        radioCreditCard.setChecked(false);
-
-        selectedRadio.setChecked(true);
     }
 
     private void processPayment() {
         btnPay.setEnabled(false);
         btnPay.setText("Processing...");
 
-        // Get user ID from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String userId = prefs.getString("user_id", "guest_" + System.currentTimeMillis());
 
-        // Calculate total amount
         double taxFee = planPrice * 0.1;
         double totalAmount = planPrice + taxFee;
 
-        // Create payment request
-        String orderInfo = "Thanh toan goi " + planName;
+        String orderInfo = planId + "|" + planName;
         PaymentRequest request = new PaymentRequest(
                 userId,
                 planId,
@@ -173,7 +176,6 @@ public class PaymentMethodActivity extends AppCompatActivity {
                 orderInfo
         );
 
-        // Call API to create payment
         Log.d(TAG, "Creating payment for user: " + userId + ", plan: " + planName);
         createVNPayPayment(request);
     }
@@ -187,36 +189,29 @@ public class PaymentMethodActivity extends AppCompatActivity {
                 btnPay.setEnabled(true);
                 btnPay.setText("Pay Now");
 
-                Log.d(TAG, "API Response Code: " + response.code());
-
                 if (response.isSuccessful() && response.body() != null) {
                     PaymentResponse paymentResponse = response.body();
 
-                    Log.d(TAG, "Payment Response: " + paymentResponse.getMessage());
-
                     if (paymentResponse.isSuccess()) {
-                        // Save transaction reference
+                        // Save transaction info
                         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
                         prefs.edit()
                                 .putString("pending_txn_ref", paymentResponse.getTxnRef())
                                 .putString("pending_plan_id", planId)
                                 .putString("pending_plan_name", planName)
                                 .putFloat("pending_amount", (float)request.getAmount())
-                                .putInt("pending_savings", planSavings)
                                 .apply();
 
                         Log.d(TAG, "Opening VNPay URL: " + paymentResponse.getPaymentUrl());
 
-                        // Open VNPay payment URL
+                        // Mở VNPay URL trong browser
                         openVNPayUrl(paymentResponse.getPaymentUrl());
                     } else {
-                        Log.e(TAG, "Payment creation failed: " + paymentResponse.getMessage());
                         Toast.makeText(PaymentMethodActivity.this,
                                 "Payment error: " + paymentResponse.getMessage(),
                                 Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Log.e(TAG, "API call failed with code: " + response.code());
                     Toast.makeText(PaymentMethodActivity.this,
                             "Failed to create payment. Please try again.",
                             Toast.LENGTH_SHORT).show();

@@ -27,9 +27,11 @@ public class PaymentReturnActivity extends AppCompatActivity {
 
         paymentApiService = RetrofitClient.getPaymentApiService();
 
-        // Handle deep link
+        // Handle deep link từ VNPay
         Intent intent = getIntent();
         Uri data = intent.getData();
+
+        Log.d(TAG, "Received intent with data: " + (data != null ? data.toString() : "null"));
 
         if (data != null) {
             handleVNPayReturn(data);
@@ -40,22 +42,31 @@ public class PaymentReturnActivity extends AppCompatActivity {
     }
 
     private void handleVNPayReturn(Uri data) {
+        // Parse VNPay response từ deep link
         String responseCode = data.getQueryParameter("vnp_ResponseCode");
-        String transactionNo = data.getQueryParameter("vnp_TransactionNo");
         String txnRef = data.getQueryParameter("vnp_TxnRef");
+        String transactionNo = data.getQueryParameter("vnp_TransactionNo");
+        String amount = data.getQueryParameter("vnp_Amount");
 
-        Log.d(TAG, "VNPay return - ResponseCode: " + responseCode + ", TxnRef: " + txnRef);
+        Log.d(TAG, "VNPay return - ResponseCode: " + responseCode +
+                ", TxnRef: " + txnRef +
+                ", TransactionNo: " + transactionNo);
 
         if ("00".equals(responseCode)) {
-            // Payment success - verify with backend
+            // Thanh toán thành công
             verifyPayment(txnRef);
         } else {
-            // Payment failed
+            // Thanh toán thất bại hoặc bị hủy
             handlePaymentFailed(responseCode);
         }
     }
 
+    /**
+     * Verify payment với backend
+     */
     private void verifyPayment(String txnRef) {
+        Log.d(TAG, "Verifying payment with txnRef: " + txnRef);
+
         Call<PaymentVerifyResponse> call = paymentApiService.verifyPayment(txnRef);
 
         call.enqueue(new Callback<PaymentVerifyResponse>() {
@@ -65,10 +76,9 @@ public class PaymentReturnActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     PaymentVerifyResponse verifyResponse = response.body();
 
-                    Log.d(TAG, "Verify response: " + verifyResponse.getStatus());
+                    Log.d(TAG, "Verify response status: " + verifyResponse.getStatus());
 
                     if (verifyResponse.isSuccess() && "success".equals(verifyResponse.getStatus())) {
-                        // Payment verified successfully
                         handlePaymentSuccess(verifyResponse);
                     } else {
                         Log.e(TAG, "Payment verification failed: " + verifyResponse.getMessage());
@@ -98,55 +108,82 @@ public class PaymentReturnActivity extends AppCompatActivity {
     }
 
     /**
-     * Handle successful payment verification
+     * Xử lý khi payment thành công
      */
     private void handlePaymentSuccess(PaymentVerifyResponse response) {
-        // Clear pending payment data
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        prefs.edit()
-                .remove("pending_txn_ref")
-                .remove("pending_plan_id")
-                .remove("pending_plan_name")
-                .remove("pending_amount")
-                .remove("pending_savings")
-                .apply();
+        Log.d(TAG, "Payment success for user: " + response.getUserId());
 
-        // (Optional) Save subscription status locally
+        // Lưu thông tin premium vào SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         prefs.edit()
                 .putBoolean("is_premium", true)
                 .putString("premium_plan_id", response.getPlanId())
                 .putString("premium_plan_name", response.getPlanName())
+                .putString("premium_user_id", response.getUserId())
+                .putLong("premium_activated_at", System.currentTimeMillis())
+                // Clear pending data
+                .remove("pending_txn_ref")
+                .remove("pending_plan_id")
+                .remove("pending_plan_name")
+                .remove("pending_amount")
                 .apply();
 
         Toast.makeText(this,
-                "Payment successful! Welcome to Premium 🎉",
+                "Welcome to Lifetime Premium!",
                 Toast.LENGTH_LONG).show();
 
-        // Redirect to success screen (or main screen)
+        // Chuyển đến màn hình success
         Intent intent = new Intent(this, PaymentSuccessActivity.class);
         intent.putExtra("plan_name", response.getPlanName());
-        intent.putExtra("amount", response.getAmount());
+        intent.putExtra("plan_price", response.getAmount());
         intent.putExtra("transaction_id", response.getTransactionId());
+        intent.putExtra("plan_savings", 0); // Lifetime không có savings
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
 
         finish();
     }
 
     /**
-     * Handle failed payment
+     * Xử lý khi payment thất bại
      */
     private void handlePaymentFailed(String responseCode) {
         Log.e(TAG, "Payment failed with VNPay response code: " + responseCode);
 
-        Toast.makeText(this,
-                "Payment failed or cancelled",
-                Toast.LENGTH_LONG).show();
+        String message;
+        switch (responseCode) {
+            case "24":
+                message = "Payment cancelled by user";
+                break;
+            case "07":
+                message = "Transaction failed - please try again";
+                break;
+            case "09":
+                message = "Card not registered for online payment";
+                break;
+            default:
+                message = "Payment failed (Code: " + responseCode + ")";
+        }
 
-        // Go back to payment method screen
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        // Quay lại màn hình payment method
         Intent intent = new Intent(this, PaymentMethodActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
 
         finish();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        // Handle deep link nếu activity đang chạy
+        Uri data = intent.getData();
+        if (data != null) {
+            handleVNPayReturn(data);
+        }
     }
 }
