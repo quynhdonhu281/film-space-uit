@@ -30,6 +30,7 @@
         <activity
             android:name=".ui.test.TestLauncherActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,11 +40,9 @@
 
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="false"
+            android:exported="false" 
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
-        <!-- ==================== SETTINGS (CHƯA TEST) ==================== -->
-        <!--
         <activity
             android:name=".ui.setting.SettingActivity"
             android:exported="false"
@@ -52,11 +51,13 @@
         <activity
             android:name=".ui.setting.EditProfileActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <activity
             android:name=".ui.setting.ChangePasswordActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
         <activity
@@ -83,20 +84,126 @@
             android:name=".ui.setting.LanguageActivity"
             android:exported="false"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
-        -->
 
-        <!-- ==================== OTHER SCREENS ==================== -->
-        <activity android:name=".ui.splash.SplashActivity" />
-        <activity android:name=".ui.onboarding.OnboardingActivity" />
-        <activity android:name=".ui.movie.MovieDetailActivity" />
-        <activity android:name=".ui.movie.MoviesByGenreActivity" />
-        <activity android:name=".ui.auth.AuthActivity" />
-        <activity android:name=".ui.auth.LoginActivity" />
-        <activity android:name=".ui.auth.RegisterActivity" />
-        <activity android:name=".ui.subscription.SubscriptionDescriptionActivity" />
-        <activity android:name=".ui.subscription.PaymentMethodActivity" />
-        <activity android:name=".ui.subscription.PaymentReturnActivity" />
-        <activity android:name=".ui.subscription.PaymentSuccessActivity" />
+        <!-- ==================== TEST LAUNCHER - Direct Movie Detail (Disabled) ==================== -->
+        <activity
+            android:name=".ui.movie.TestMovieDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== ONBOARDING (OPTIONAL) ==================== -->
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== AUTH ==================== -->
+        <activity
+            android:name=".ui.auth.AuthActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== MOVIE DETAILS ==================== -->
+        <activity
+            android:name=".ui.movie.MovieDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <activity
+            android:name=".ui.movie.MoviesByGenreActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+
+<!--        &lt;!&ndash; ==================== SPLASH as LAUNCHER ==================== &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".ui.splash.SplashActivity"-->
+<!--            android:exported="true"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
+<!--        &lt;!&ndash; ==================== ONBOARDING ==================== &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".ui.onboarding.OnboardingActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        &lt;!&ndash; ==================== MAIN ==================== &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".ui.main.MainActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        &lt;!&ndash; ==================== SETTINGS ACTIVITIES (FOR TESTING) ==================== &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".ui.setting.SettingActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.EditProfileActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.ChangePasswordActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.NotificationsActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.SecurityActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.HelpSupportActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.LegalPoliciesActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.setting.LanguageActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />-->
+
+<!--        &lt;!&ndash; ==================== MOVIE DETAILS (COMMENTED FOR NOW) ==================== &ndash;&gt;-->
+<!--        &lt;!&ndash;-->
+<!--        <activity-->
+<!--            android:name=".ui.movie.MovieDetailActivity"-->
+<!--            android:exported="false" />-->
+<!--        &ndash;&gt;-->
+
+<!--        &lt;!&ndash; ==================== OTHER ACTIVITIES (COMMENTED FOR NOW) ==================== &ndash;&gt;-->
+<!--        &lt;!&ndash;-->
+<!--        <activity-->
+<!--            android:name=".ui.movie.MoviesByGenreActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.auth.AuthActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.auth.LoginActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".ui.auth.RegisterActivity"-->
+<!--            android:exported="false" />-->
+<!--        &ndash;&gt;-->
 
     </application>
 

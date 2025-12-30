@@ -27,6 +27,9 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
     private ViewPager2 viewPager2;
     private Context context;
     private OnMovieClickListener listener;
+    
+    // Multiplier for creating circular scrolling effect (tripling the items)
+    private static final int LOOP_MULTIPLIER = 3;
 
     public interface OnMovieClickListener {
         void onMovieClick(Movie movie);
@@ -62,8 +65,8 @@ public class MovieSliderAdapter extends RecyclerView.Adapter<MovieSliderAdapter.
 
     @Override
     public int getItemCount() {
-        // Return a large number to simulate infinite scrolling
-        return movies.size() > 0 ? Integer.MAX_VALUE : 0;
+        // Return tripled size for circular scrolling (more elegant than Integer.MAX_VALUE)
+        return movies.size() > 0 ? movies.size() * LOOP_MULTIPLIER : 0;
     }
 
     public class SliderViewHolder extends RecyclerView.ViewHolder {

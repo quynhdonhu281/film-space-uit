@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +13,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
+import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
+import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.example.filmspace_mobile.ui.adapters.EpisodeAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +23,25 @@ import java.util.List;
 public class MovieEpisodeFragment extends Fragment {
 
     private RecyclerView rvEpisodes;
+    private TextView tvEmptyState;
     private EpisodeAdapter episodeAdapter;
+    private Movie movie;
+    private UserSessionManager sessionManager;
 
-    public static MovieEpisodeFragment newInstance() {
-        return new MovieEpisodeFragment();
+    public static MovieEpisodeFragment newInstance(Movie movie) {
+        MovieEpisodeFragment fragment = new MovieEpisodeFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("movie", movie);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            movie = (Movie) getArguments().getSerializable("movie");
+        }
     }
 
     @Nullable
@@ -44,11 +62,21 @@ public class MovieEpisodeFragment extends Fragment {
 
     private void initViews(View view) {
         rvEpisodes = view.findViewById(R.id.rvEpisodes);
+        tvEmptyState = view.findViewById(R.id.tvEmptyState);
     }
 
     private void setupRecyclerView() {
+        if (getContext() == null) return;
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvEpisodes.setLayoutManager(layoutManager);
+
+        // Initialize session manager to get user premium status
+        if (sessionManager == null) {
+            sessionManager = new UserSessionManager(getContext());
+        }
+        
+        boolean userIsPremium = sessionManager.isPremium();
 
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
             // Handle episode click - navigate to video player
@@ -63,46 +91,39 @@ public class MovieEpisodeFragment extends Fragment {
     }
 
     private void loadEpisodes() {
-        // TODO: Load from API
-        // For now, load dummy data
-        List<Episode> dummyEpisodes = new ArrayList<>();
+        // Check if fragment is still attached and activity is not finishing
+        if (!isAdded() || getContext() == null || getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        
+        // Get movie from arguments or parent activity
+        if (movie == null) {
+            if (getActivity() instanceof MovieDetailActivity) {
+                MovieDetailActivity activity = (MovieDetailActivity) getActivity();
+                movie = activity.getMovie();
+            }
+        }
+        
+        if (movie == null) {
+            showEmptyState(true);
+            return;
+        }
+        
+        // Load episodes from movie object
+        List<Episode> episodes = movie.getEpisodes();
+        if (episodes != null && !episodes.isEmpty()) {
+            episodeAdapter.updateData(episodes);
+            showEmptyState(false);
+        } else {
+            // No episodes available - show empty state instead of toast
+            showEmptyState(true);
+        }
+    }
 
-        dummyEpisodes.add(new Episode(
-                1, 1,
-                "The Vanishing of Will Byers",
-                "On his way home from a friend's house, young Will sees something terrifying. Nearby, a sinister secret lurks in the depths of a government lab.",
-                "",
-                49,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                2, 2,
-                "The Weirdo on Maple Street",
-                "Lucas, Mike, and Dustin try to talk to the girl found in the woods. Hopper questions an anxious Joyce about an unsettling phone call.",
-                "",
-                56,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                3, 3,
-                "Holly, Jolly",
-                "An increasingly concerned Nancy looks for Barb and finds out what Jonathan's been up to. Joyce is convinced Will is trying to talk to her.",
-                "",
-                52,
-                "2016-07-15"
-        ));
-
-        dummyEpisodes.add(new Episode(
-                4, 4,
-                "The Body",
-                "Refusing to believe Will is dead, Joyce tries to connect with her son. The boys give Eleven a makeover. Nancy and Jonathan form an unlikely alliance.",
-                "",
-                50,
-                "2016-07-15"
-        ));
-
-        episodeAdapter.updateData(dummyEpisodes);
+    private void showEmptyState(boolean show) {
+        if (tvEmptyState != null && rvEpisodes != null) {
+            tvEmptyState.setVisibility(show ? View.VISIBLE : View.GONE);
+            rvEpisodes.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 }

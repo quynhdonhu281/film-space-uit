@@ -34,6 +34,7 @@ public class Episode {
     public Episode(int id, int episodeNumber, String title, String description,
                    String videoUrl, int duration, String releaseDate) {
         this.id = id;
+        this.movieId = movieId;
         this.episodeNumber = episodeNumber;
         this.title = title;
         this.description = description;

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/color_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -49,9 +49,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Movie Title"
-                    android:textColor="@android:color/white"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:textAppearance="@style/TextAppearance.FilmSpace.Headline"
+                    android:textColor="@android:color/white" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -82,13 +81,13 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPlay"
                     android:layout_width="200dp"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_height="@dimen/input_height_large"
+                    android:layout_marginTop="@dimen/spacing_l"
                     android:text="Play"
                     app:icon="@drawable/ic_movie_play"
                     app:iconGravity="textStart"
                     android:backgroundTint="#7A5AF8"
-                    app:cornerRadius="30dp" />
+                    app:cornerRadius="@dimen/card_corner_radius_large" />
             </LinearLayout>
         </FrameLayout>
 
@@ -106,6 +105,16 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/tabLayout"
             app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

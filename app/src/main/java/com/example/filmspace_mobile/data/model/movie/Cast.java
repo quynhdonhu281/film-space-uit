@@ -1,9 +1,17 @@
 package com.example.filmspace_mobile.data.model.movie;
 
-public class Cast {
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
+public class Cast implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private int id;
     private String name;
     private String character;
+    
+    @SerializedName("avatarUrl")
     private String profileUrl;
 
     // Constructor rỗng

@@ -2,11 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="150dp"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    style="@style/Widget.FilmSpace.MovieCard">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +12,7 @@
         <ImageView
             android:id="@+id/pic"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="@dimen/movie_card_height"
             android:scaleType="centerCrop" />
 
         <TextView
@@ -24,10 +20,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="TextView"
-            android:textSize="12sp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.FilmSpace.Small"
+            android:layout_marginStart="@dimen/spacing_s"
+            android:layout_marginEnd="@dimen/spacing_s"
+            android:layout_marginTop="@dimen/spacing_s"
             android:lines="2"
             android:maxLines="2"
             android:ellipsize="end" />
@@ -37,12 +33,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Action, Adventure"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.FilmSpace.Caption"
+            android:layout_marginStart="@dimen/spacing_s"
+            android:layout_marginEnd="@dimen/spacing_s"
+            android:layout_marginBottom="@dimen/spacing_s"
+            android:layout_marginTop="@dimen/spacing_xxs"
             android:maxLines="1"
             android:ellipsize="end" />
     </LinearLayout>

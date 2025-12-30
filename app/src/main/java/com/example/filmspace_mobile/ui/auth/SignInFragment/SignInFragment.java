@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import android.text.TextUtils;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +16,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.filmspace_mobile.R;
+import com.example.filmspace_mobile.utils.ValidationHelper;
 import com.example.filmspace_mobile.viewmodel.AuthViewModel;
 import com.example.filmspace_mobile.ui.main.MainActivity;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -71,18 +70,23 @@ public class SignInFragment extends Fragment {
         // Observe login response
         authViewModel.getLoginResponse().observe(getViewLifecycleOwner(), loginResponse -> {
             if (loginResponse != null && loginResponse.getToken() != null) {
-                Toast.makeText(requireContext(), "Login successful", Toast.LENGTH_SHORT).show();
-                // Navigate to MainActivity
+                Snackbar.make(view, R.string.login_successful, Snackbar.LENGTH_SHORT).show();
+                // Clear data to prevent re-triggering
+                authViewModel.clearLoginData();
+                // Navigate to MainActivity with proper flags to avoid unnecessary recreation
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                requireActivity().finish();
+                // No need to call finish() - flags handle clearing the back stack
             }
         });
 
         // Observe login error
         authViewModel.getLoginError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                Snackbar.make(view, error, Snackbar.LENGTH_LONG).show();
+                // Clear error after showing
+                authViewModel.clearLoginData();
             }
         });
 
@@ -95,8 +99,8 @@ public class SignInFragment extends Fragment {
         // Continue button click
         continueButton.setOnClickListener(v -> handleSignIn());
 
-        // Continue with Google button click
-        continueWithGoogleButton.setOnClickListener(v -> handleGoogleSignIn());
+        // Hide Google Sign-In button (not implemented yet)
+        continueWithGoogleButton.setVisibility(View.GONE);
 
         // Forgot Password click
         forgotPasswordTextView.setOnClickListener(v -> {
@@ -115,36 +119,18 @@ public class SignInFragment extends Fragment {
     }
 
     private void handleSignIn() {
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString().trim();
-
-        // Validate email format
-        if (TextUtils.isEmpty(email)) {
-            emailInput.setError("Email is required");
-            emailInput.requestFocus();
+        // Validate inputs using ValidationHelper
+        if (!ValidationHelper.validateEmail(emailInput)) {
             return;
         }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailInput.setError("Invalid email format");
-            emailInput.requestFocus();
-            return;
-        }
-
-        // Validate password
-        if (TextUtils.isEmpty(password)) {
-            passwordInput.setError("Password is required");
-            passwordInput.requestFocus();
-            return;
-        }
-
-        if (password.length() < 8) {
-            passwordInput.setError("Password must be at least 8 characters");
-            passwordInput.requestFocus();
+        
+        if (!ValidationHelper.validatePassword(passwordInput)) {
             return;
         }
 
         // Call login via ViewModel
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
         userEmail = email;
         authViewModel.login(email, password);
     }
@@ -155,21 +141,5 @@ public class SignInFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putString("email", userEmail);
         Navigation.findNavController(requireView()).navigate(R.id.action_signInFragment_to_OTPVerificationFragment, bundle);
-    }
-
-    private void handleGoogleSignIn() {
-        // TODO: Implement Google Sign-In
-        /*
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.server_client_id))
-                .requestEmail()
-                .build();
-
-        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso);
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-        */
-
-        Toast.makeText(requireContext(), "Google Sign-In not implemented yet", Toast.LENGTH_SHORT).show();
     }
 }

@@ -79,6 +79,14 @@ dependencies {
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
+    
+    // Paging 3 for pagination
+    implementation ("androidx.paging:paging-runtime:3.3.5")
+
+    // Room for local database
+    implementation ("androidx.room:room-runtime:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-paging:2.6.1")
 
     // Security - EncryptedSharedPreferences
     implementation ("androidx.security:security-crypto:1.1.0")
@@ -92,4 +100,6 @@ dependencies {
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)
+
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 }

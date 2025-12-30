@@ -9,7 +9,8 @@ public class UserResponse {
     private String role;
     private String createdAt;
     private int reviewCount;
-    private int watchlistCount;
+    // private int watchlistCount;
+    private boolean isPremium;
 
     public int getId() {
         return id;
@@ -43,7 +44,11 @@ public class UserResponse {
         return reviewCount;
     }
 
-    public int getWatchlistCount() {
-        return watchlistCount;
+    // public int getWatchlistCount() {
+    //     return watchlistCount;
+    // }
+    
+    public boolean isPremium() {
+        return isPremium;
     }
 }

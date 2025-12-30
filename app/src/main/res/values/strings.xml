@@ -43,4 +43,34 @@
     <string name="terms_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.</string>
 
     <string name="changes_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.</string>
+    
+    <!-- Error States -->
+    <string name="error_icon">Error Icon</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="retry">Retry</string>
+    
+    <!-- Auth Messages -->
+    <string name="login_successful">Login successful</string>
+    <string name="logout_successful">Logged out successfully</string>
+    <string name="google_sign_in_not_implemented">Google Sign-In not implemented yet</string>
+    
+    <!-- Movie Messages -->
+    <string name="failed_to_load_watch_history">Failed to load watch history</string>
+    <string name="invalid_movie_id">Invalid movie ID</string>
+    <string name="opening_video_player">Opening video player…</string>
+    <string name="no_episodes_available">No episodes available</string>
+    <string name="no_reviews_yet">No reviews yet</string>
+    <string name="please_select_rating">Please select a rating</string>
+    <string name="review_submitted">Review submitted successfully!</string>
+    
+    <!-- Settings Messages -->
+    <string name="language_set_english">Language set to English</string>
+    <string name="user_email_not_found">User email not found</string>
+    
+    <!-- Registration Messages -->
+    <string name="registration_successful">Registration successful! OTP sent to your email</string>
+    <string name="google_signup_not_implemented">Google Sign-Up not implemented</string>
+    
+    <!-- Password Change Messages -->
+    <string name="password_changed_successfully">Password changed successfully!</string>
 </resources>

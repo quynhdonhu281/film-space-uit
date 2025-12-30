@@ -1,10 +1,22 @@
 package com.example.filmspace_mobile.data.model.auth;
 
 public class UpdateUserRequest {
+    private String username;
     private String name;
+    private String email;
 
-    public UpdateUserRequest(String name) {
+    public UpdateUserRequest(String username, String name, String email) {
+        this.username = username;
         this.name = name;
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getName() {
@@ -13,5 +25,13 @@ public class UpdateUserRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

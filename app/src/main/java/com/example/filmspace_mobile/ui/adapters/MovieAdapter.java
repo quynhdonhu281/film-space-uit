@@ -49,7 +49,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Movie movie = movies.get(position);
-        holder.title.setText(movie.getTitle());
+        
+        // Set title with null check
+        String title = movie.getTitle();
+        if (title != null && !title.isEmpty()) {
+            holder.title.setText(title);
+            holder.title.setVisibility(View.VISIBLE);
+        } else {
+            holder.title.setText("Unknown Title");
+            holder.title.setVisibility(View.VISIBLE);
+        }
 
         // Set genres
         if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
@@ -76,6 +85,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
+                // Debug: Log movie id
+                android.util.Log.d("MovieAdapter", "Clicked movie id: " + movie.getId());
                 listener.onMovieClick(movie);
             }
         });

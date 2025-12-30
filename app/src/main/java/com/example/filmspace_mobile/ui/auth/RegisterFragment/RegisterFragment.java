@@ -9,16 +9,15 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import android.text.Editable;
-import android.text.TextUtils;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.R;
+import com.example.filmspace_mobile.utils.ValidationHelper;
 import com.example.filmspace_mobile.viewmodel.AuthViewModel;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.regex.Pattern;
@@ -133,7 +132,9 @@ public class RegisterFragment extends Fragment {
                 if (BuildConfig.DEBUG) {
                     android.util.Log.d("RegisterFragment", "Register response: message=" + registerResponse.getMessage() + ", email=" + registerResponse.getEmail());
                 }
-                Toast.makeText(requireContext(), "Registration successful! OTP sent to your email", Toast.LENGTH_SHORT).show();
+                Snackbar.make(view, R.string.registration_successful, Snackbar.LENGTH_SHORT).show();
+                // Clear data to prevent re-triggering
+                authViewModel.clearRegisterData();
                 // Navigate to OTP verification with email
                 Bundle bundle = new Bundle();
                 bundle.putString("email", userEmail);
@@ -148,10 +149,11 @@ public class RegisterFragment extends Fragment {
         // Observe register error
         authViewModel.getRegisterError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
+                authViewModel.clearRegisterData();
                 if (BuildConfig.DEBUG) {
                     android.util.Log.e("RegisterFragment", "Register error: " + error);
                 }
-                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show();
+                Snackbar.make(view, error, Snackbar.LENGTH_LONG).show();
             }
         });
 
@@ -162,78 +164,32 @@ public class RegisterFragment extends Fragment {
         });
 
         view.findViewById(R.id.continueButton).setOnClickListener(v -> {
+            // Validate all fields using ValidationHelper
+            if (!ValidationHelper.validateFullname(fullnameInput)) {
+                return;
+            }
+            
+            if (!ValidationHelper.validateUsername(usernameInput)) {
+                return;
+            }
+            
+            if (!ValidationHelper.validateEmail(emailInput)) {
+                return;
+            }
+            
+            if (!ValidationHelper.validateStrongPassword(passwordInput)) {
+                return;
+            }
+            
+            if (!ValidationHelper.validatePasswordMatch(passwordInput, confirmPasswordInput)) {
+                return;
+            }
+
+            // Get validated values
             String fullname = fullnameInput.getText().toString().trim();
             String username = usernameInput.getText().toString().trim();
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
-            String confirmPassword = confirmPasswordInput.getText().toString().trim();
-
-            // Validate fullname
-            if (TextUtils.isEmpty(fullname)) {
-                fullnameInput.setError("Fullname is required");
-                fullnameInput.requestFocus();
-                return;
-            }
-
-            if (!fullname.matches("[a-zA-Z ]+")) {
-                fullnameInput.setError("Fullname must contain only English letters");
-                fullnameInput.requestFocus();
-                return;
-            }
-
-            // Validate username
-            if (TextUtils.isEmpty(username)) {
-                usernameInput.setError("Username is required");
-                usernameInput.requestFocus();
-                return;
-            }
-
-            if (username.contains(" ")) {
-                usernameInput.setError("Username cannot contain spaces");
-                usernameInput.requestFocus();
-                return;
-            }
-
-            if (username.length() < 3) {
-                usernameInput.setError("Username must be at least 3 characters");
-                usernameInput.requestFocus();
-                return;
-            }
-
-            // Validate email
-            if (TextUtils.isEmpty(email)) {
-                emailInput.setError("Email is required");
-                emailInput.requestFocus();
-                return;
-            }
-
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                emailInput.setError("Invalid email format");
-                emailInput.requestFocus();
-                return;
-            }
-
-            // Validate password
-            if (TextUtils.isEmpty(password)) {
-                passwordInput.setError("Password is required");
-                passwordInput.requestFocus();
-                return;
-            }
-
-            if (password.length() < 8 ||
-                !Pattern.compile("[A-Z]").matcher(password).find() ||
-                !Pattern.compile("[a-z]").matcher(password).find() ||
-                !Pattern.compile("[^a-zA-Z0-9]").matcher(password).find()) {
-                passwordInput.setError("Password must be 8+ chars with uppercase, lowercase, and special character");
-                passwordInput.requestFocus();
-                return;
-            }
-
-            if (!password.equals(confirmPassword)) {
-                confirmPasswordInput.setError("Passwords do not match");
-                confirmPasswordInput.requestFocus();
-                return;
-            }
 
             // Store email for later use
             userEmail = email;
@@ -241,11 +197,8 @@ public class RegisterFragment extends Fragment {
             authViewModel.register(email, password, username, fullname);
         });
 
-        // Continue with Google
-        view.findViewById(R.id.continueWithGoogleButton).setOnClickListener(v -> {
-            // TODO: Implement Google Sign-Up
-            Toast.makeText(requireContext(), "Google Sign-Up not implemented", Toast.LENGTH_SHORT).show();
-        });
+        // Hide Google Sign-Up button (not implemented yet)
+        view.findViewById(R.id.continueWithGoogleButton).setVisibility(View.GONE);
 
         // Sign in link
         view.findViewById(R.id.signInTextView).setOnClickListener(v -> {

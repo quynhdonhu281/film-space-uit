@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp">
+    android:layout_margin="@dimen/spacing_l">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -29,8 +29,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sign Up"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.FilmSpace.Hero"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -66,19 +65,22 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxBackgroundMode="none"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/emailTextInput"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginBottom="15dp"
+                        android:layout_height="@dimen/input_height_large"
+                        android:layout_marginBottom="@dimen/spacing_m"
                         android:background="@drawable/custom_edittext"
                         android:gravity="center_vertical"
                         android:hint="example@gmail.com"
                         android:inputType="textEmailAddress"
                         android:maxLines="1"
-                        android:padding="16dp" />
+                        android:padding="@dimen/spacing_default" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -92,19 +94,20 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxBackgroundMode="none"
                     app:hintEnabled="false">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/fullnameTextInput"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginBottom="15dp"
+                        android:layout_height="@dimen/input_height_large"
+                        android:layout_marginBottom="@dimen/spacing_m"
                         android:background="@drawable/custom_edittext"
                         android:gravity="center_vertical"
                         android:hint="Nguyen Van A"
                         android:inputType="textPersonName"
                         android:maxLines="1"
-                        android:padding="16dp" />
+                        android:padding="@dimen/spacing_default" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -118,19 +121,22 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxBackgroundMode="none"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/usernameTextInput"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginBottom="15dp"
+                        android:layout_height="@dimen/input_height_large"
+                        android:layout_marginBottom="@dimen/spacing_m"
                         android:background="@drawable/custom_edittext"
                         android:gravity="center_vertical"
                         android:hint="nguyenvana"
                         android:inputType="text"
                         android:maxLines="1"
-                        android:padding="16dp" />
+                        android:padding="@dimen/spacing_default" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -144,20 +150,21 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxBackgroundMode="none"
                     app:hintEnabled="false"
                     app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/passwordTextInput"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginBottom="15dp"
+                        android:layout_height="@dimen/input_height_large"
+                        android:layout_marginBottom="@dimen/spacing_m"
                         android:background="@drawable/custom_edittext"
                         android:gravity="center_vertical"
                         android:hint="Password"
                         android:inputType="textPassword"
                         android:maxLines="1"
-                        android:padding="16dp" />
+                        android:padding="@dimen/spacing_default" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -170,19 +177,20 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxBackgroundMode="none"
                     app:hintEnabled="false"
                     app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/confirmPasswordTextInput"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
+                        android:layout_height="@dimen/input_height_large"
                         android:background="@drawable/custom_edittext"
                         android:gravity="center_vertical"
                         android:hint="Confirm Password"
                         android:inputType="textPassword"
                         android:maxLines="1"
-                        android:padding="16dp" />
+                        android:padding="@dimen/spacing_default" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <ProgressBar
@@ -195,15 +203,17 @@
                     android:visibility="gone" />
 
                 <LinearLayout
+                    android:id="@+id/passwordRequirementsLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="@dimen/spacing_s"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <ImageView
                         android:id="@+id/imageView2"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
                         app:srcCompat="@drawable/baseline_check_circle_24" />
 
                     <TextView
@@ -211,22 +221,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_s"
                         android:text="Password must be at least 8 character, uppercase, lowercase, and unique code like #%!"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/text_size_small" />
                 </LinearLayout>
 
                 <Button
                     android:id="@+id/continueButton"
+                    style="@style/Widget.FilmSpace.Button.Primary"
                     android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="30dp"
-                    android:paddingLeft="32dp"
-                    android:paddingTop="14dp"
-                    android:paddingRight="32dp"
-                    android:paddingBottom="14dp"
-                    android:text="Continue"
-                    android:textSize="18sp"
-                    android:backgroundTint="@color/color_main"/>
+                    android:layout_height="56dp"
+                    android:layout_marginTop="@dimen/spacing_xl"
+                    android:text="Continue" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

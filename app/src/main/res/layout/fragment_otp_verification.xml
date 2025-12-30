@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp">
+    android:layout_margin="@dimen/spacing_l">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -20,8 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OTP Verification"
-            android:textSize="30sp"
-            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.FilmSpace.Hero"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -152,16 +151,10 @@
 
         <Button
             android:id="@+id/continueButton"
+            style="@style/Widget.FilmSpace.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="40dp"
-            android:paddingLeft="32dp"
-            android:paddingTop="14dp"
-            android:paddingRight="32dp"
-            android:paddingBottom="14dp"
-            android:text="Continue"
-            android:textSize="18sp"
-            android:backgroundTint="@color/color_main"/>
+            android:layout_marginTop="@dimen/spacing_xxxl"
+            android:text="Continue" />
 
         <LinearLayout
             android:layout_width="match_parent"

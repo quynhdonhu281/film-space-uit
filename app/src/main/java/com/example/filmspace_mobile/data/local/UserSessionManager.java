@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
@@ -22,8 +24,12 @@ public class UserSessionManager {
     private static final String KEY_AVATAR_URL = "avatarUrl";
     private static final String KEY_NAME = "name";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_IS_PREMIUM = "isPremium";
 
     private final SharedPreferences prefs;
+    
+    // LiveData for reactive auth state
+    private final MutableLiveData<Boolean> isLoggedInLiveData = new MutableLiveData<>();
 
     public UserSessionManager(Context context) {
         SharedPreferences tempPrefs;
@@ -49,6 +55,16 @@ public class UserSessionManager {
             tempPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         }
         prefs = tempPrefs;
+        
+        // Initialize LiveData with current state
+        isLoggedInLiveData.setValue(isLoggedIn());
+    }
+    
+    /**
+     * Get LiveData for auth state - UI can observe this
+     */
+    public LiveData<Boolean> getIsLoggedInLiveData() {
+        return isLoggedInLiveData;
     }
 
     /**
@@ -56,7 +72,7 @@ public class UserSessionManager {
      * Always clears old user data before storing new user (only 1 user stored at a time)
      */
     public void saveUserSession(int userId, String username, String email, 
-                                 String avatarUrl, String name, String token) {
+                                 String avatarUrl, String name, String token, boolean isPremium) {
         SharedPreferences.Editor editor = prefs.edit();
         
         // Clear any existing user data first
@@ -70,7 +86,11 @@ public class UserSessionManager {
         editor.putString(KEY_AVATAR_URL, avatarUrl);
         editor.putString(KEY_NAME, name);
         editor.putString(KEY_TOKEN, token);
+        editor.putBoolean(KEY_IS_PREMIUM, isPremium);
         editor.apply();
+        
+        // Update LiveData
+        isLoggedInLiveData.postValue(true);
     }
 
     /**
@@ -123,12 +143,22 @@ public class UserSessionManager {
     }
 
     /**
+     * Check if user is premium
+     */
+    public boolean isPremium() {
+        return prefs.getBoolean(KEY_IS_PREMIUM, false);
+    }
+
+    /**
      * Clear user session (logout)
      */
     public void clearSession() {
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.apply();
+        
+        // Update LiveData
+        isLoggedInLiveData.postValue(false);
     }
 
     /**

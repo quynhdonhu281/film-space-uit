@@ -4,10 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
     tools:context=".ui.main.HomeFragment.HomeFragment"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:layout_margin="20dp">
+    android:layout_margin="@dimen/spacing_l">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"

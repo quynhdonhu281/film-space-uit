@@ -7,7 +7,17 @@ import com.example.filmspace_mobile.FilmSpaceApplication;
 import com.example.filmspace_mobile.data.api.ApiService;
 import com.example.filmspace_mobile.data.api.AuthInterceptor;
 import com.example.filmspace_mobile.data.api.SafeIntegerAdapter;
+import com.example.filmspace_mobile.data.api.deserializer.CastDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.EpisodeDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.LoginResponseDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.MovieDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.UserResponseDeserializer;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
+import com.example.filmspace_mobile.data.model.auth.LoginResponse;
+import com.example.filmspace_mobile.data.model.auth.UserResponse;
+import com.example.filmspace_mobile.data.model.movie.Cast;
+import com.example.filmspace_mobile.data.model.movie.Episode;
+import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -36,6 +46,11 @@ public class NetworkModule {
                 .setLenient()
                 .registerTypeAdapter(int.class, new SafeIntegerAdapter())
                 .registerTypeAdapter(Integer.class, new SafeIntegerAdapter())
+                .registerTypeAdapter(Movie.class, new MovieDeserializer())
+                .registerTypeAdapter(Cast.class, new CastDeserializer())
+                .registerTypeAdapter(Episode.class, new EpisodeDeserializer())
+                .registerTypeAdapter(LoginResponse.class, new LoginResponseDeserializer())
+                .registerTypeAdapter(UserResponse.class, new UserResponseDeserializer())
                 .create();
     }
 

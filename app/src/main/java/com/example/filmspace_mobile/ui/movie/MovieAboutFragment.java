@@ -78,6 +78,8 @@ public class MovieAboutFragment extends Fragment {
     }
 
     private void setupCastRecyclerView() {
+        if (getContext() == null) return;
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 getContext(),
                 LinearLayoutManager.HORIZONTAL,
@@ -87,13 +89,19 @@ public class MovieAboutFragment extends Fragment {
 
         castAdapter = new CastAdapter(new ArrayList<>(), cast -> {
             // Handle cast click - navigate to actor details
-            Toast.makeText(getContext(), "Clicked: " + cast.getName(), Toast.LENGTH_SHORT).show();
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Clicked: " + cast.getName(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         rvCast.setAdapter(castAdapter);
     }
 
     private void loadData() {
+        if (!isAdded() || getContext() == null || getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        
         if (movie != null) {
             // Display story line
             tvStoryLine.setText(movie.getOverview());

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -14,9 +15,74 @@
         android:textColor="@color/black"
         android:layout_marginBottom="16dp" />
 
+    <!-- Submit Review Section -->
+    <LinearLayout
+        android:id="@+id/submitReviewSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Write a Review"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginBottom="8dp" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1"
+            android:rating="5"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/reviewCommentInput"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="Share your thoughts about this movie..."
+            android:gravity="top|start"
+            android:padding="12dp"
+            android:background="@drawable/rounded"
+            android:textSize="14sp"
+            android:inputType="textMultiLine"
+            android:maxLength="500"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnSubmitReview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit Review"
+            android:backgroundTint="@color/color_main"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <!-- Login Prompt for Non-logged Users -->
+    <TextView
+        android:id="@+id/loginPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please login to write a review"
+        android:textSize="14sp"
+        android:textColor="@color/darker_gray"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReviews"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

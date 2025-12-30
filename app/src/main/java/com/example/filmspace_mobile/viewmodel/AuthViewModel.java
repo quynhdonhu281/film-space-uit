@@ -194,4 +194,66 @@ public class AuthViewModel extends ViewModel {
             }
         });
     }
+    
+    // ==================== CLEAR METHODS TO PREVENT STALE DATA ====================
+    
+    /**
+     * Clear login LiveData - Call after consuming success/error
+     */
+    public void clearLoginData() {
+        loginResponseLiveData.setValue(null);
+        loginErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear register LiveData - Call after consuming success/error
+     */
+    public void clearRegisterData() {
+        registerResponseLiveData.setValue(null);
+        registerErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear OTP verification LiveData - Call after consuming success/error
+     */
+    public void clearVerifyOTPData() {
+        verifyOTPResponseLiveData.setValue(null);
+        verifyOTPErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear resend OTP LiveData - Call after consuming success/error
+     */
+    public void clearResendOTPData() {
+        resendOTPResponseLiveData.setValue(null);
+        resendOTPErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear forgot password LiveData - Call after consuming success/error
+     */
+    public void clearForgotPasswordData() {
+        forgotPasswordResponseLiveData.setValue(null);
+        forgotPasswordErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear reset password LiveData - Call after consuming success/error
+     */
+    public void clearResetPasswordData() {
+        resetPasswordResponseLiveData.setValue(null);
+        resetPasswordErrorLiveData.setValue(null);
+    }
+    
+    /**
+     * Clear all auth LiveData at once
+     */
+    public void clearAllAuthData() {
+        clearLoginData();
+        clearRegisterData();
+        clearVerifyOTPData();
+        clearResendOTPData();
+        clearForgotPasswordData();
+        clearResetPasswordData();
+    }
 }
