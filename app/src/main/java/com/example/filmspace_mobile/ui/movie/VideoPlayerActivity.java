@@ -29,9 +29,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.api.EpisodeApiService;
 import com.example.filmspace_mobile.data.api.RetrofitClient;
+import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
 import com.example.filmspace_mobile.ui.adapters.VideoEpisodeAdapter;
 import com.example.filmspace_mobile.ui.subscription.SubscriptionDescriptionActivity;
+import com.example.filmspace_mobile.utils.PremiumUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +88,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     // API Service
     private EpisodeApiService episodeApiService;
+    
+    // Session Manager for premium status
+    private UserSessionManager sessionManager;
 
     // ==============================
     // Activity Lifecycle
@@ -104,6 +109,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         // Initialize API
         episodeApiService = RetrofitClient.getEpisodeApiService();
+        
+        // Initialize session manager
+        sessionManager = new UserSessionManager(this);
 
         // Initialize views
         initViews();
@@ -342,10 +350,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
         rvEpisodes.setLayoutManager(new LinearLayoutManager(this));
 
         episodeAdapter = new VideoEpisodeAdapter(episodeList, (episode, position) -> {
-            // Check if episode is premium and user is not premium
-            if (episode.isPremium() && !isPremiumUser()) {
-                // Show premium dialog instead of navigating to activity
-                showPremiumDialog();
+            // ✅ IMPROVED: Use centralized premium check logic
+            if (!PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
+                PremiumUtils.showPremiumDialog(this, episode);
+                PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
                 return;
             }
 
@@ -358,8 +366,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     }
 
     private boolean isPremiumUser() {
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        return prefs.getBoolean("is_premium", false);
+        return sessionManager.isPremium();
     }
 
     // ==============================
@@ -400,6 +407,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
             Toast.makeText(this, "Episode data is null", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // ✅ ADD PREMIUM CHECK - This was the missing critical check!
+        if (!PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
+            PremiumUtils.showPremiumDialog(this, episode);
+            PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
+            return;
+        }
+
+        // Log successful premium access
+        PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
 
         // Update title
         String title = movieTitle != null ? movieTitle : "Episode";
@@ -707,13 +724,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (currentEpisodePosition < episodeList.size() - 1) {
             Episode nextEpisode = episodeList.get(currentEpisodePosition + 1);
 
-            // Check if next episode is premium
-            if (nextEpisode.isPremium() && !isPremiumUser()) {
-                Toast.makeText(this, "This episode requires premium subscription",
-                        Toast.LENGTH_LONG).show();
-
-                // Show premium dialog instead of navigating to activity
-                showPremiumDialog();
+            // ✅ IMPROVED: Use centralized premium check logic
+            if (!PremiumUtils.canUserAccessEpisode(nextEpisode, sessionManager)) {
+                PremiumUtils.showPremiumDialog(this);
+                PremiumUtils.logPremiumAccess(nextEpisode, sessionManager.isPremium(), false);
                 return;
             }
 
@@ -741,31 +755,4 @@ public class VideoPlayerActivity extends AppCompatActivity {
     // Premium Dialog
     // ==============================
 
-    private void showPremiumDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_premium_episode);
-        dialog.setCancelable(true);
-
-        // Get dialog window and set properties
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-
-        // Get buttons
-        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
-        Button btnUpgrade = dialog.findViewById(R.id.btn_upgrade);
-
-        // Cancel button
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        // Upgrade button
-        btnUpgrade.setOnClickListener(v -> {
-            dialog.dismiss();
-            // Navigate to subscription screen
-            Intent intent = new Intent(VideoPlayerActivity.this, SubscriptionDescriptionActivity.class);
-            startActivity(intent);
-        });
-
-        dialog.show();
-    }
 }

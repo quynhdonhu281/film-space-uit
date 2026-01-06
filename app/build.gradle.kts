@@ -19,13 +19,13 @@ android {
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
         // Use your actual IP (e.g., 10.0.104.68) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app/\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app/\"")
         }
         release {
             isMinifyEnabled = true

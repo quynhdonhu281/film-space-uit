@@ -6,9 +6,11 @@ import com.example.filmspace_mobile.data.model.payment.SubscriptionCheckResponse
 import com.example.filmspace_mobile.data.model.payment.TransactionHistoryResponse;
 import com.example.filmspace_mobile.data.model.payment.PaymentVerifyResponse;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -18,8 +20,9 @@ public interface PaymentApiService {
      * Create VNPay payment URL
      * POST /payment/create-vnpay-url
      */
-    @POST("payment/create-vnpay-url")
-    Call<PaymentResponse> createPayment(@Body PaymentRequest request);
+    @POST("payment/create")
+    @Headers("Content-Type: application/json")
+    Call<PaymentResponse> createPayment(@Body RequestBody userId);
 
     /**
      * Verify payment status

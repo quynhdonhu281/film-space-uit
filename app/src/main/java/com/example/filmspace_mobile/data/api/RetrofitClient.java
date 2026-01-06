@@ -6,6 +6,16 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import com.example.filmspace_mobile.data.api.deserializer.EpisodeDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.MovieDeserializer;
+import com.example.filmspace_mobile.data.api.deserializer.CastDeserializer;
+import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.Episode;
+import com.example.filmspace_mobile.data.model.movie.Cast;
+
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +33,14 @@ public class RetrofitClient {
             }
         }
         return retrofit;
+    }
+    private static Gson createGsonWithDeserializers() {
+        return new GsonBuilder()
+                .setLenient()
+                .registerTypeAdapter(Episode.class, new EpisodeDeserializer())
+                .registerTypeAdapter(Movie.class, new MovieDeserializer())
+                .registerTypeAdapter(Cast.class, new CastDeserializer())
+                .create();
     }
 
     private static Retrofit createRetrofit() {
@@ -48,7 +66,7 @@ public class RetrofitClient {
         return new Retrofit.Builder()
                 .baseUrl(ApiConfig.API_BASE_URL)
                 .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(createGsonWithDeserializers()))
                 .build();
     }
 

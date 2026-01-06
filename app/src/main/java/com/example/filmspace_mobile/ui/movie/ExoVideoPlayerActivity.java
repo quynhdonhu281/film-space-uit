@@ -37,6 +37,7 @@ import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
 import com.example.filmspace_mobile.ui.adapters.VideoEpisodeAdapter;
 import com.example.filmspace_mobile.ui.subscription.SubscriptionDescriptionActivity;
+import com.example.filmspace_mobile.utils.PremiumUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -276,11 +277,15 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if episode is premium and user has access
-        if (episode.isPremium() && !hasUserPremiumAccess()) {
-            showPremiumDialog(episode);
+        // ✅ IMPROVED: Use centralized premium check logic
+        if (!PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
+            PremiumUtils.showPremiumDialog(this, episode);
+            PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
             return;
         }
+
+        // Log successful premium access
+        PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
 
         String videoUrl = episode.getVideoUrl();
         if (videoUrl == null || videoUrl.isEmpty()) {
@@ -288,7 +293,6 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
             return;
         }
 
-        Log.d(TAG, "Playing video: " + videoUrl);
 
         // Create media item and play
         MediaItem mediaItem = MediaItem.fromUri(videoUrl);
@@ -391,51 +395,6 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
         if (controlsVisible) {
             episodesContainer.setVisibility(View.VISIBLE);
         }
-    }
-
-    private boolean hasUserPremiumAccess() {
-        // Check user premium status from session manager
-        return sessionManager.isPremium();
-    }
-
-    private void showPremiumDialog(Episode episode) {
-        new AlertDialog.Builder(this)
-                .setTitle("Premium Episode")
-                .setMessage("This episode requires a Premium subscription. Would you like to upgrade to Premium to watch this content?")
-                .setIcon(R.drawable.ic_premium) // You may need to add this icon
-                .setPositiveButton("Upgrade to Premium", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Navigate to payment/subscription screen
-                        navigateToPayment();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setCancelable(true)
-                .show();
-    }
-
-    private void navigateToPayment() {
-        try {
-            // Try to navigate to SubscriptionDescriptionActivity
-            Intent intent = new Intent(this, SubscriptionDescriptionActivity.class);
-            startActivity(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "Error navigating to payment screen", e);
-            Toast.makeText(this, "Unable to open payment screen", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Deprecated
-    private void showPremiumDialog() {
-        // Deprecated method - use showPremiumDialog(Episode episode) instead
-        Intent intent = new Intent(this, SubscriptionDescriptionActivity.class);
-        startActivity(intent);
     }
 
     @Override

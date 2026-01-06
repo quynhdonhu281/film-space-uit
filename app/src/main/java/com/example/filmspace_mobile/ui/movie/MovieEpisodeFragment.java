@@ -17,6 +17,7 @@ import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
 import com.example.filmspace_mobile.data.model.movie.Movie;
 import com.example.filmspace_mobile.ui.adapters.EpisodeAdapter;
+import com.example.filmspace_mobile.utils.PremiumUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,13 +80,21 @@ public class MovieEpisodeFragment extends Fragment {
         boolean userIsPremium = sessionManager.isPremium();
 
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
-            // Handle episode click - navigate to video player
-            Intent intent = new Intent(getContext(), VideoPlayerActivity.class);
-            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, 1); // TODO: Get actual movie ID
-            intent.putExtra(VideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
-            intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, "Stranger Things"); // TODO: Get actual movie title
-            startActivity(intent);
-        }, userIsPremium);
+            //IMPROVED: Use centralized premium check logic
+            if (PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
+                // User can watch - navigate to video player
+                Intent intent = new Intent(getContext(), VideoPlayerActivity.class);
+                intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, movie.getId());
+                intent.putExtra(VideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
+                intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, movie.getTitle());
+                PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
+                startActivity(intent);
+            } else {
+                // User cannot watch - show premium dialog
+                PremiumUtils.showPremiumDialog(getContext(), episode);
+                PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
+            }
+        }, sessionManager.isPremium());
 
         rvEpisodes.setAdapter(episodeAdapter);
     }
@@ -130,4 +139,5 @@ public class MovieEpisodeFragment extends Fragment {
             rvEpisodes.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
+
 }

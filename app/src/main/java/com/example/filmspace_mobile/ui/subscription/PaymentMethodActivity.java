@@ -15,10 +15,14 @@ import androidx.cardview.widget.CardView;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.api.PaymentApiService;
 import com.example.filmspace_mobile.data.api.RetrofitClient;
+import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.payment.PaymentRequest;
 import com.example.filmspace_mobile.data.model.payment.PaymentResponse;
 import java.text.NumberFormat;
 import java.util.Locale;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,6 +50,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
     private String selectedPaymentMethod = "vnpay_qr";
 
     private PaymentApiService paymentApiService;
+    private UserSessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
             setContentView(R.layout.activity_payment_method);
 
             paymentApiService = RetrofitClient.getPaymentApiService();
+            sessionManager = new UserSessionManager(this);
 
             getIntentData();
             initViews();
@@ -160,28 +166,37 @@ public class PaymentMethodActivity extends AppCompatActivity {
         btnPay.setEnabled(false);
         btnPay.setText("Processing...");
 
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String userId = prefs.getString("user_id", "guest_" + System.currentTimeMillis());
+        int userId = sessionManager.getUserId();
 
-        double taxFee = planPrice * 0.1;
-        double totalAmount = planPrice + taxFee;
+        try {
+            Log.d(TAG, "Creating payment for user: " + userId + ", plan: " + planName);
 
-        String orderInfo = planId + "|" + planName;
-        PaymentRequest request = new PaymentRequest(
-                userId,
-                planId,
-                planName,
-                (int) Math.round(totalAmount), // Cast to int
-                selectedPaymentMethod,
-                orderInfo
-        );
+            if (userId == -1) {
+                Log.e(TAG, "User not logged in");
+                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+                btnPay.setEnabled(true);
+                btnPay.setText("Pay Now");
+                return;
+            }
 
-        Log.d(TAG, "Creating payment for user: " + userId + ", plan: " + planName);
-        createVNPayPayment(request);
+            createVNPayPayment(userId);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing payment", e);
+            Toast.makeText(this, "Error processing payment", Toast.LENGTH_SHORT).show();
+            btnPay.setEnabled(true);
+            btnPay.setText("Pay Now");
+        }
     }
 
-    private void createVNPayPayment(PaymentRequest request) {
-        Call<PaymentResponse> call = paymentApiService.createPayment(request);
+    private void createVNPayPayment(int userId) {
+        // Tạo RequestBody chứa raw number
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json"),
+                String.valueOf(userId)
+        );
+
+        Call<PaymentResponse> call = paymentApiService.createPayment(body);
 
         call.enqueue(new Callback<PaymentResponse>() {
             @Override
@@ -192,19 +207,23 @@ public class PaymentMethodActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     PaymentResponse paymentResponse = response.body();
 
+                    Log.d(TAG, "Payment Response: success=" + paymentResponse.isSuccess() +
+                            ", message=" + paymentResponse.getMessage());
+
                     if (paymentResponse.isSuccess()) {
-                        // Save transaction info
+                        // Extract txnRef từ URL
+                        String txnRef = extractTxnRef(paymentResponse.getPaymentUrl());
+
                         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
                         prefs.edit()
-                                .putString("pending_txn_ref", paymentResponse.getTxnRef())
+                                .putString("pending_txn_ref", txnRef)
                                 .putString("pending_plan_id", planId)
                                 .putString("pending_plan_name", planName)
-                                .putInt("pending_amount", request.getAmount()) // Change to putInt
                                 .apply();
 
+                        Log.d(TAG, "TxnRef: " + txnRef);
                         Log.d(TAG, "Opening VNPay URL: " + paymentResponse.getPaymentUrl());
 
-                        // Mở VNPay URL trong browser
                         openVNPayUrl(paymentResponse.getPaymentUrl());
                     } else {
                         Toast.makeText(PaymentMethodActivity.this,
@@ -212,17 +231,27 @@ public class PaymentMethodActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                     }
                 } else {
+                    Log.e(TAG, "Response failed: " + response.code() + " - " + response.message());
                     Toast.makeText(PaymentMethodActivity.this,
                             "Failed to create payment. Please try again.",
                             Toast.LENGTH_SHORT).show();
                 }
             }
 
+            // Thêm method helper để extract txnRef từ URL
+            private String extractTxnRef(String paymentUrl) {
+                try {
+                    Uri uri = Uri.parse(paymentUrl);
+                    return uri.getQueryParameter("vnp_TxnRef");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error extracting txnRef", e);
+                    return null;
+                }
+            }
             @Override
             public void onFailure(Call<PaymentResponse> call, Throwable t) {
                 btnPay.setEnabled(true);
                 btnPay.setText("Pay Now");
-
                 Log.e(TAG, "Payment API error", t);
                 Toast.makeText(PaymentMethodActivity.this,
                         "Network error: " + t.getMessage(),
@@ -230,13 +259,12 @@ public class PaymentMethodActivity extends AppCompatActivity {
             }
         });
     }
-
     private void openVNPayUrl(String paymentUrl) {
         try {
             // Mở PaymentReturnActivity với WebView thay vì browser
             Intent intent = new Intent(this, PaymentReturnActivity.class);
             intent.putExtra("payment_url", paymentUrl);
-            intent.putExtra("user_id", getSharedPreferences("user_prefs", MODE_PRIVATE).getString("user_id", ""));
+            intent.putExtra("user_id", String.valueOf(sessionManager.getUserId()));
             startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "Error opening VNPay WebView", e);
