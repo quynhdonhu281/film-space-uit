@@ -3,6 +3,10 @@ package com.example.filmspace_mobile.ui.main.SearchFragment;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,41 +16,44 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
 import com.example.filmspace_mobile.R;
+import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.Cast;
+import com.example.filmspace_mobile.data.repository.MovieRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 import com.example.filmspace_mobile.databinding.FragmentSearchBinding;
-import com.example.filmspace_mobile.ui.adapters.MovieHorizontalAdapter;
+import com.example.filmspace_mobile.ui.adapters.CastAdapter;
+import com.example.filmspace_mobile.ui.adapters.GenreAdapter;
 import com.example.filmspace_mobile.ui.adapters.SearchGridAdapter;
-import com.example.filmspace_mobile.ui.main.HomeFragment.HomeViewModel;
 import com.example.filmspace_mobile.ui.movie.MovieDetailActivity;
+import com.example.filmspace_mobile.viewmodel.GenreViewModel;
 import com.example.filmspace_mobile.viewmodel.MovieViewModel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject; // Sử dụng javax thay vì jakarta
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SearchFragment extends Fragment {
-    FragmentSearchBinding binding;
+    private FragmentSearchBinding binding;
     private MovieViewModel movieViewModel;
-    private HomeViewModel homeViewModel;
-    private MovieHorizontalAdapter topRatingAdapter;
+    private GenreViewModel genreViewModel;
+
+    private GenreAdapter genreAdapter;
+    private CastAdapter actorAdapter;
+
     private SearchGridAdapter searchGridAdapter;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+    @Inject
+    MovieRepository movieRepository;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentSearchBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -55,27 +62,39 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize ViewModels
         movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        genreViewModel = new ViewModelProvider(this).get(GenreViewModel.class);
 
-        setupRecyclerViews();
+        setupExploreRecyclerViews();
+        setupSearchRecyclerView();
         setupSearchView();
         setupObservers();
-        
-        // Load initial data
+
+        // Load data ban đầu
         movieViewModel.fetchAllMovies();
+        genreViewModel.fetchAllGenres();
+        loadAllCasts();
     }
 
-    private void setupRecyclerViews() {
-        // Setup top rating RecyclerView (initial state)
-        binding.topRatingRecyclerView.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-        );
-        topRatingAdapter = new MovieHorizontalAdapter(movie -> openMovieDetail(movie.getId()));
-        binding.topRatingRecyclerView.setAdapter(topRatingAdapter);
+    private void setupExploreRecyclerViews() {
+        // 1. Genres
+        binding.genresRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        genreAdapter = new GenreAdapter(genre -> {
+            binding.searchView.setQuery(genre.getName(), true);
+        });
+        binding.genresRecyclerView.setAdapter(genreAdapter);
 
-        // Setup search results RecyclerView (grid layout)
+        // 2. Actors (Lấy từ API riêng)
+        binding.actorsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        actorAdapter = new CastAdapter(new ArrayList<>(), cast -> {
+            binding.searchView.setQuery(cast.getName(), true);
+        });
+        binding.actorsRecyclerView.setAdapter(actorAdapter);
+
+
+    }
+
+    private void setupSearchRecyclerView() {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         binding.searchResultsRecyclerView.setLayoutManager(gridLayoutManager);
         searchGridAdapter = new SearchGridAdapter(movie -> openMovieDetail(movie.getId()));
@@ -84,8 +103,10 @@ public class SearchFragment extends Fragment {
 
     private void setupSearchView() {
         TextView searchEditText = binding.searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        searchEditText.setTextColor(Color.BLACK);
-        searchEditText.setHintTextColor(Color.GRAY);
+        if (searchEditText != null) {
+            searchEditText.setTextColor(Color.BLACK);
+            searchEditText.setHintTextColor(Color.GRAY);
+        }
 
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -97,59 +118,56 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText == null || newText.trim().isEmpty()) {
-                    // Show initial state when search is empty
                     showInitialState();
                 } else {
-                    // Perform search as user types
                     performSearch(newText);
                 }
                 return true;
             }
         });
-
-        // Handle search view close button
-        binding.searchView.setOnCloseListener(() -> {
-            showInitialState();
-            return false;
-        });
     }
 
     private void setupObservers() {
-        // Observe all movies from MovieViewModel
-        movieViewModel.getAllMovies().observe(getViewLifecycleOwner(), movies -> {
-            if (movies != null && !movies.isEmpty()) {
-                homeViewModel.setMovies(movies);
-            }
+        // Observe thể loại
+        genreViewModel.getGenres().observe(getViewLifecycleOwner(), genres -> {
+            if (genres != null) genreAdapter.setGenres(genres);
         });
 
-        // Observe top rating movies for initial display
-        homeViewModel.getTopRatingMovies().observe(getViewLifecycleOwner(), movies -> {
-            if (movies != null && !movies.isEmpty()) {
-                topRatingAdapter.setMovies(movies);
+        // Chỉ observe phim để phục vụ việc search local
+        movieViewModel.getAllMovies().observe(getViewLifecycleOwner(), movies -> {
+            // Dữ liệu đã được load và sẵn sàng cho search
+        });
+    }
+
+    private void loadAllCasts() {
+        movieRepository.getAllCasts(new RepositoryCallback<List<Cast>>() {
+            @Override
+            public void onSuccess(List<Cast> casts) {
+                if (isAdded() && casts != null) {
+                    actorAdapter.updateData(casts);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                android.util.Log.e("SearchFragment", "Error loading casts: " + error);
             }
         });
     }
 
     private void performSearch(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            showInitialState();
-            return;
-        }
-
-        // Get all movies and filter by search query
+        String finalQuery = query.toLowerCase().trim();
         movieViewModel.getAllMovies().observe(getViewLifecycleOwner(), allMovies -> {
             if (allMovies != null) {
-                List<com.example.filmspace_mobile.data.model.movie.Movie> filteredMovies = 
-                    allMovies.stream()
-                        .filter(movie -> movie.getTitle().toLowerCase()
-                                .contains(query.toLowerCase().trim()))
-                        .collect(Collectors.toList());
+                List<Movie> filtered = allMovies.stream()
+                        .filter(movie ->
+                                (movie.getTitle() != null && movie.getTitle().toLowerCase().contains(finalQuery))  ||
+                                        (movie.getGenres() != null && movie.getGenres().stream().anyMatch(g -> g.getName().toLowerCase().contains(finalQuery))) ||
+                                        (movie.getCasts() != null && movie.getCasts().stream().anyMatch(c -> c.getName().toLowerCase().contains(finalQuery)))
+                        ).collect(Collectors.toList());
 
-                if (filteredMovies.isEmpty()) {
-                    showEmptyState();
-                } else {
-                    showSearchResults(filteredMovies);
-                }
+                if (filtered.isEmpty()) showEmptyState();
+                else showSearchResults(filtered);
             }
         });
     }
@@ -160,7 +178,7 @@ public class SearchFragment extends Fragment {
         binding.emptyLayout.setVisibility(View.GONE);
     }
 
-    private void showSearchResults(List<com.example.filmspace_mobile.data.model.movie.Movie> movies) {
+    private void showSearchResults(List<Movie> movies) {
         binding.initialLayout.setVisibility(View.GONE);
         binding.searchResultsLayout.setVisibility(View.VISIBLE);
         binding.emptyLayout.setVisibility(View.GONE);
@@ -177,7 +195,6 @@ public class SearchFragment extends Fragment {
         Intent intent = new Intent(getContext(), MovieDetailActivity.class);
         intent.putExtra("movieId", movieId);
         startActivity(intent);
-        // Add slide animation
         if (getActivity() != null) {
             getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }

@@ -2,11 +2,11 @@ package com.example.filmspace_mobile.ui.movie;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,18 +16,29 @@ import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+// 1. Import Repository và Callback
+import com.example.filmspace_mobile.data.repository.HistoryRepository;
+import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 import com.example.filmspace_mobile.ui.adapters.EpisodeAdapter;
 import com.example.filmspace_mobile.utils.PremiumUtils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject; // Import Inject
+import dagger.hilt.android.AndroidEntryPoint; // Import Hilt
 
+@AndroidEntryPoint // [BẮT BUỘC] Để Inject được Repository
 public class MovieEpisodeFragment extends Fragment {
 
+    private static final String TAG = "MovieEpisodeFragment";
     private RecyclerView rvEpisodes;
     private TextView tvEmptyState;
     private EpisodeAdapter episodeAdapter;
     private Movie movie;
     private UserSessionManager sessionManager;
+
+    // [BƯỚC 1] Inject HistoryRepository
+    @Inject
+    HistoryRepository historyRepository;
 
     public static MovieEpisodeFragment newInstance(Movie movie) {
         MovieEpisodeFragment fragment = new MovieEpisodeFragment();
@@ -43,6 +54,7 @@ public class MovieEpisodeFragment extends Fragment {
         if (getArguments() != null) {
             movie = (Movie) getArguments().getSerializable("movie");
         }
+        sessionManager = new UserSessionManager(requireContext());
     }
 
     @Nullable
@@ -55,10 +67,33 @@ public class MovieEpisodeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         initViews(view);
         setupRecyclerView();
         loadEpisodes();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        sessionManager = new UserSessionManager(requireContext());
+        boolean isVip = sessionManager.isPremium();
+
+        if (episodeAdapter != null) {
+            episodeAdapter.setUserIsPremium(isVip);
+            episodeAdapter.notifyDataSetChanged();
+        }
+
+        if (isVip && getActivity() instanceof MovieDetailActivity) {
+            ((MovieDetailActivity) getActivity()).refreshMovieData();
+        }
+    }
+
+    public void updateEpisodes(List<Episode> newEpisodes) {
+        if (newEpisodes == null) return;
+        if (episodeAdapter != null) {
+            episodeAdapter.updateData(newEpisodes);
+        }
+        showEmptyState(newEpisodes.isEmpty());
     }
 
     private void initViews(View view) {
@@ -68,68 +103,68 @@ public class MovieEpisodeFragment extends Fragment {
 
     private void setupRecyclerView() {
         if (getContext() == null) return;
-        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvEpisodes.setLayoutManager(layoutManager);
 
-        // Initialize session manager to get user premium status
-        if (sessionManager == null) {
-            sessionManager = new UserSessionManager(getContext());
-        }
-        
-        boolean userIsPremium = sessionManager.isPremium();
-
         episodeAdapter = new EpisodeAdapter(new ArrayList<>(), episode -> {
-            //IMPROVED: Use centralized premium check logic
-            if (PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
-                // User can watch - navigate to video player
-                Intent intent = new Intent(getContext(), VideoPlayerActivity.class);
-                intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_ID, movie.getId());
-                intent.putExtra(VideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
-                intent.putExtra(VideoPlayerActivity.EXTRA_MOVIE_TITLE, movie.getTitle());
-                PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
-                startActivity(intent);
-            } else {
-                // User cannot watch - show premium dialog
-                PremiumUtils.showPremiumDialog(getContext(), episode);
-                PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
-            }
+            handleEpisodeClick(episode);
         }, sessionManager.isPremium());
 
         rvEpisodes.setAdapter(episodeAdapter);
     }
 
-    private void loadEpisodes() {
-        // Check if fragment is still attached and activity is not finishing
-        if (!isAdded() || getContext() == null || getActivity() == null || getActivity().isFinishing()) {
+    private void handleEpisodeClick(Episode episode) {
+        if (PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
+            // Chuẩn bị Intent play video
+            Intent intent = new Intent(getContext(), ExoVideoPlayerActivity.class);
+            intent.putExtra(ExoVideoPlayerActivity.EXTRA_MOVIE_ID, movie.getId());
+            intent.putExtra(ExoVideoPlayerActivity.EXTRA_EPISODE_ID, episode.getId());
+            intent.putExtra(ExoVideoPlayerActivity.EXTRA_MOVIE_TITLE, movie.getTitle());
+
+            // [BƯỚC 3] Gọi hàm lưu lịch sử TRƯỚC khi chuyển màn hình
+            addToWatchHistory(movie.getId());
+
+            PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
+            startActivity(intent);
+        } else {
+            PremiumUtils.showPremiumDialog(getContext(), episode);
+            PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
+        }
+    }
+
+    // [BƯỚC 2] Hàm xử lý gọi API ngầm
+    private void addToWatchHistory(int movieId) {
+        // Chỉ gọi API nếu user đã đăng nhập
+        if (!sessionManager.isLoggedIn()) {
             return;
         }
-        
-        // Get movie from arguments or parent activity
-        if (movie == null) {
-            if (getActivity() instanceof MovieDetailActivity) {
-                MovieDetailActivity activity = (MovieDetailActivity) getActivity();
-                movie = activity.getMovie();
+
+        Log.d(TAG, "addToWatchHistory: Adding movie " + movieId + " to history...");
+
+        // Gọi Repository đã có sẵn
+        historyRepository.addToHistory(movieId, new RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                // Thành công: Log lại để debug
+                Log.d(TAG, "API Success: Added to history");
             }
-        }
-        
-        if (movie == null) {
-            showEmptyState(true);
-            Toast.makeText(getContext(), "Unable to load movie data", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // Load episodes from movie object (from get movie by id response)
+
+            @Override
+            public void onError(String errorMessage) {
+                // Thất bại: Log lỗi (không cần show Toast làm phiền user)
+                Log.e(TAG, "API Error: " + errorMessage);
+            }
+        });
+    }
+
+    private void loadEpisodes() {
+        if (!isAdded() || movie == null) return;
         List<Episode> episodes = movie.getEpisodes();
         if (episodes != null && !episodes.isEmpty()) {
             episodeAdapter.updateData(episodes);
             showEmptyState(false);
         } else {
-            // No episodes available - show empty state
             showEmptyState(true);
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "No episodes available", Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
@@ -139,5 +174,4 @@ public class MovieEpisodeFragment extends Fragment {
             rvEpisodes.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-
 }

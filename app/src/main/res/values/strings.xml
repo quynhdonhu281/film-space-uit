@@ -70,7 +70,14 @@
     <!-- Registration Messages -->
     <string name="registration_successful">Registration successful! OTP sent to your email</string>
     <string name="google_signup_not_implemented">Google Sign-Up not implemented</string>
-    
+
+    <string-array name="review_filters">
+        <item>Tất cả</item>
+        <item>Mới nhất</item>
+        <item>Cũ nhất</item>
+        <item>Điểm cao nhất</item>
+        <item>Điểm thấp nhất</item>
+    </string-array>
     <!-- Password Change Messages -->
     <string name="password_changed_successfully">Password changed successfully!</string>
 </resources>

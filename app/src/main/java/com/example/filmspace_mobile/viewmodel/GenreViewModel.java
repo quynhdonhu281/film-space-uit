@@ -17,10 +17,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class GenreViewModel extends ViewModel {
     private static final String TAG = "GenreViewModel";
-    
+
     private final GenreRepository genreRepository;
 
-    // Genres
     private final MutableLiveData<List<Genre>> genresLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> genresErrorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> genresLoadingLiveData = new MutableLiveData<>();
@@ -35,20 +34,34 @@ public class GenreViewModel extends ViewModel {
     public LiveData<String> getGenresError() { return genresErrorLiveData; }
     public LiveData<Boolean> getGenresLoading() { return genresLoadingLiveData; }
 
-    // Fetch all genres
+    /**
+     * Đồng bộ tên hàm với SearchFragment
+     */
+    public void fetchAllGenres() {
+        fetchGenres();
+    }
+
+    /**
+     * Fetch all genres từ Repository
+     */
     public void fetchGenres() {
+        // Kiểm tra nếu đã có dữ liệu rồi thì không cần load lại (tối ưu performance)
+        if (genresLiveData.getValue() != null && !genresLiveData.getValue().isEmpty()) {
+            return;
+        }
+
         genresLoadingLiveData.setValue(true);
         genreRepository.getAllGenres(new RepositoryCallback<List<Genre>>() {
             @Override
             public void onSuccess(List<Genre> genres) {
-                genresLoadingLiveData.setValue(false);
-                genresLiveData.setValue(genres);
+                genresLoadingLiveData.postValue(false); // Dùng postValue cho an toàn từ background thread
+                genresLiveData.postValue(genres);
             }
 
             @Override
             public void onError(String errorMessage) {
-                genresLoadingLiveData.setValue(false);
-                genresErrorLiveData.setValue(errorMessage);
+                genresLoadingLiveData.postValue(false);
+                genresErrorLiveData.postValue(errorMessage);
             }
         });
     }

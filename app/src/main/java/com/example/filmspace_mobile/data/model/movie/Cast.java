@@ -53,7 +53,12 @@ public class Cast implements Serializable {
     public String getProfileUrl() {
         return profileUrl;
     }
-
+    public String getFullAvatarUrl() {
+        if (profileUrl == null || profileUrl.isEmpty()) return null;
+        // Thay link này bằng link ngrok hiện tại của bạn hoặc dùng biến từ Constant/BuildConfig
+        String baseUrl = "https://d58vokudzsdux.cloudfront.net/";
+        return  profileUrl;
+    }
     public void setProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;
     }

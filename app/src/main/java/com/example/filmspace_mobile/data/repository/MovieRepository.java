@@ -1,9 +1,10 @@
 package com.example.filmspace_mobile.data.repository;
 
-
 import com.example.filmspace_mobile.BuildConfig;
 import com.example.filmspace_mobile.data.api.ApiService;
+import com.example.filmspace_mobile.data.model.movie.Cast;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.MovieViewResponse; // [MỚI] Import Model này
 import com.example.filmspace_mobile.data.model.movie.RecommendationsResponse;
 
 import java.net.SocketTimeoutException;
@@ -20,7 +21,7 @@ import retrofit2.Response;
 @Singleton
 public class MovieRepository {
     private static final String TAG = "MovieRepository";
-    
+
     private final ApiService apiService;
 
     @Inject
@@ -30,7 +31,6 @@ public class MovieRepository {
 
     /**
      * Fetch all movies from the API
-     * @param callback Callback to handle success or failure
      */
     public void getAllMovies(RepositoryCallback<List<Movie>> callback) {
         apiService.getAllMovies().enqueue(new Callback<List<Movie>>() {
@@ -53,10 +53,7 @@ public class MovieRepository {
     }
 
     /**
-     * Fetch movies with pagination for better performance
-     * @param page Page number (starting from 1)
-     * @param pageSize Number of items per page
-     * @param callback Callback to handle success or failure
+     * Fetch movies with pagination
      */
     public void getMoviesPaginated(int page, int pageSize, RepositoryCallback<List<Movie>> callback) {
         apiService.getMoviesPaginated(page, pageSize).enqueue(new Callback<List<Movie>>() {
@@ -79,43 +76,35 @@ public class MovieRepository {
     }
 
     /**
-     * Fetch top rated movies using fallback to getAllMovies and sort by rating
+     * Fetch top rated movies
      */
     public void getTopRatedMovies(int movieId, int limit, RepositoryCallback<List<Movie>> callback) {
-        // First try the specific endpoint
         apiService.getTopRatedMovies(movieId, limit).enqueue(new Callback<List<Movie>>() {
             @Override
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());
                 } else {
-                    // Fallback to getAllMovies and sort by rating
                     getAllMoviesAndSortByRating(limit, callback);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Movie>> call, Throwable t) {
-                // Fallback to getAllMovies and sort by rating
                 getAllMoviesAndSortByRating(limit, callback);
             }
         });
     }
 
-    /**
-     * Fallback method to get all movies and sort by rating
-     */
     private void getAllMoviesAndSortByRating(int limit, RepositoryCallback<List<Movie>> callback) {
         apiService.getAllMoviesForTopRated().enqueue(new Callback<List<Movie>>() {
             @Override
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Movie> movies = response.body();
-                    // Sort by rating descending
                     movies.sort((m1, m2) -> Double.compare(m2.getRating(), m1.getRating()));
-                    // Limit results
-                    List<Movie> topRated = movies.size() > limit ? 
-                        movies.subList(0, limit) : movies;
+                    List<Movie> topRated = movies.size() > limit ?
+                            movies.subList(0, limit) : movies;
                     callback.onSuccess(topRated);
                 } else {
                     String errorMessage = getHttpErrorMessage(response.code());
@@ -133,8 +122,6 @@ public class MovieRepository {
 
     /**
      * Fetch movies by genre ID
-     * @param genreId The genre ID to filter movies
-     * @param callback Callback to handle success or failure
      */
     public void getMoviesByGenre(int genreId, RepositoryCallback<List<Movie>> callback) {
         apiService.getMoviesByGenre(genreId).enqueue(new Callback<List<Movie>>() {
@@ -157,25 +144,12 @@ public class MovieRepository {
     }
 
     /**
-     * Fetch movie by ID with full details (cast, episodes, reviews)
-     * @param movieId The movie ID to fetch
-     * @param callback Callback to handle success or failure
+     * Fetch movie by ID
      */
     public void getMovieById(int movieId, RepositoryCallback<Movie> callback) {
         apiService.getMovieById(movieId).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
-                // if (BuildConfig.DEBUG) {
-                //     android.util.Log.d(TAG, "getMovieById response code: " + response.code());
-                //     android.util.Log.d(TAG, "getMovieById response body is null: " + (response.body() == null));
-                //     try {
-                //         if (response.errorBody() != null) {
-                //             android.util.Log.d(TAG, "Error body: " + response.errorBody().string());
-                //         }
-                //     } catch (Exception e) {
-                //         android.util.Log.e(TAG, "Error reading error body", e);
-                //     }
-                // }
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());
                 } else {
@@ -194,9 +168,7 @@ public class MovieRepository {
     }
 
     /**
-     * Fetch recommended movies for the user
-     * @param limit The number of recommendations to fetch
-     * @param callback Callback to handle success or failure
+     * Fetch recommended movies
      */
     public void getRecommendedMovies(int limit, RepositoryCallback<List<Movie>> callback) {
         apiService.getRecommendedMovies(limit).enqueue(new Callback<RecommendationsResponse>() {
@@ -204,10 +176,8 @@ public class MovieRepository {
             public void onResponse(Call<RecommendationsResponse> call, Response<RecommendationsResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     List<Movie> movies = response.body().getData();
-                    // Log for debugging
                     if (BuildConfig.DEBUG && movies != null && !movies.isEmpty()) {
                         android.util.Log.d(TAG, "Recommended movies count: " + movies.size());
-                        android.util.Log.d(TAG, "First movie title: " + (movies.get(0).getTitle() != null ? movies.get(0).getTitle() : "NULL"));
                     }
                     callback.onSuccess(movies);
                 } else {
@@ -223,41 +193,72 @@ public class MovieRepository {
             }
         });
     }
+    public void getAllCasts(RepositoryCallback<List<Cast>> callback) {
+        apiService.getAllCasts().enqueue(new Callback<List<Cast>>() {
+            @Override
+            public void onResponse(Call<List<Cast>> call, Response<List<Cast>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to fetch casts");
+                }
+            }
 
+            @Override
+            public void onFailure(Call<List<Cast>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
     /**
-     * Get user-friendly error message based on HTTP status code
+     * [MỚI] Fetch movie views count
+     * Hàm này nhận về Object MovieViewResponse nhưng trả về Long (totalViews) cho UI
      */
+
+    public void getMovieViews(int movieId, RepositoryCallback<Long> callback) {
+        apiService.getMovieViews(movieId).enqueue(new Callback<MovieViewResponse>() {
+            @Override
+            public void onResponse(Call<MovieViewResponse> call, Response<MovieViewResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Lấy trường totalViews từ Object JSON trả về
+                    long totalViews = response.body().getTotalViews();
+                    callback.onSuccess(totalViews);
+                } else {
+                    // Nếu lỗi hoặc không có data, trả về 0 để UI hiển thị "0 views" thay vì lỗi
+                    callback.onSuccess(0L);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MovieViewResponse> call, Throwable t) {
+                // Network error, log lại và trả về message lỗi
+                // Tuy nhiên với view count, có thể bạn muốn trả về 0L trong onSuccess thay vì onError
+                // để không làm gián đoạn trải nghiệm người dùng.
+                // Nhưng ở đây mình giữ logic chuẩn là báo lỗi.
+                callback.onError(getNetworkErrorMessage(t));
+            }
+        });
+    }
+
+    // --- Helper Methods ---
+
     private String getHttpErrorMessage(int code) {
         switch (code) {
-            case 400:
-                return "Invalid request. Please check your input.";
-            case 401:
-                return "Unauthorized. Please login again.";
-            case 403:
-                return "Access forbidden.";
-            case 404:
-                return "Movies not found.";
-            case 500:
-            case 502:
-            case 503:
-                return "Server error. Please try again later.";
-            default:
-                return "Failed to load movies. Please try again.";
+            case 400: return "Invalid request. Please check your input.";
+            case 401: return "Unauthorized. Please login again.";
+            case 403: return "Access forbidden.";
+            case 404: return "Movies not found.";
+            case 500: case 502: case 503: return "Server error. Please try again later.";
+            default: return "Failed to load movies. Please try again.";
         }
     }
 
-    /**
-     * Get user-friendly error message based on exception type
-     */
     private String getNetworkErrorMessage(Throwable t) {
         if (t instanceof UnknownHostException) {
             return "No internet connection. Please check your network.";
         } else if (t instanceof SocketTimeoutException) {
             return "Request timed out. Please try again.";
         } else {
-            if (BuildConfig.DEBUG) {
-                return "Error: " + t.getMessage();
-            }
             return "Something went wrong. Please try again.";
         }
     }

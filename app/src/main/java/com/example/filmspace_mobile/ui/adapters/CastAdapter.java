@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide; // Import Glide
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Cast;
 import java.util.List;
@@ -68,10 +69,16 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
         public void bind(Cast cast) {
             tvCastName.setText(cast.getName());
-            // Glide.with(itemView.getContext())
-            //     .load(cast.getProfileUrl())
-            //     .placeholder(R.drawable.ic_profile)
-            //     .into(imgCast);
+
+            // [QUAN TRỌNG] Gọi hàm lấy URL đầy đủ
+            String avatarUrl = cast.getFullAvatarUrl();
+
+            Glide.with(itemView.getContext())
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .error(R.drawable.ic_profile_placeholder)
+                    .circleCrop() // [MỚI] Bo tròn ảnh diễn viên cho chuyên nghiệp
+                    .into(imgCast);
         }
     }
 }

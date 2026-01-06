@@ -1,22 +1,17 @@
 package com.example.filmspace_mobile.ui.movie;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.OptIn;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -27,16 +22,12 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.api.EpisodeApiService;
 import com.example.filmspace_mobile.data.api.RetrofitClient;
 import com.example.filmspace_mobile.data.local.UserSessionManager;
 import com.example.filmspace_mobile.data.model.movie.Episode;
-import com.example.filmspace_mobile.ui.adapters.VideoEpisodeAdapter;
-import com.example.filmspace_mobile.ui.subscription.SubscriptionDescriptionActivity;
 import com.example.filmspace_mobile.utils.PremiumUtils;
 
 import java.util.ArrayList;
@@ -50,47 +41,33 @@ import retrofit2.Response;
 public class ExoVideoPlayerActivity extends AppCompatActivity {
 
     private static final String TAG = "ExoVideoPlayerActivity";
-    
+
     public static final String EXTRA_MOVIE_ID = "movie_id";
     public static final String EXTRA_EPISODE_ID = "episode_id";
     public static final String EXTRA_MOVIE_TITLE = "movie_title";
 
     // UI Components
     private PlayerView playerView;
-    private FrameLayout videoContainer;
-    private LinearLayout episodesContainer;
-    private ImageButton btnBack, btnRewind, btnForward, btnFullscreen;
-    private RecyclerView rvEpisodes;
-    private ProgressBar progressBar;
+    private ProgressBar loadingProgressBar;
+    private ImageButton btnBack; // Nút Back mới thêm
 
     // ExoPlayer
     private ExoPlayer exoPlayer;
-    
-    // Adapter and data
-    private VideoEpisodeAdapter episodeAdapter;
+
+    // Data
+    // Vẫn giữ list để hỗ trợ tính năng "Tự động chuyển tập tiếp theo" (Auto-play next)
     private List<Episode> episodeList = new ArrayList<>();
     private int currentEpisodePosition = 0;
 
     // Intent data
     private int movieId;
     private int episodeId;
-    private String movieTitle;
-
-    // Handler for UI updates
-    private final Handler handler = new Handler(Looper.getMainLooper());
 
     // State variables
     private boolean isFullscreen = false;
-    private boolean controlsVisible = true;
 
-    // Constants
-    private static final int CONTROL_HIDE_DELAY = 3000;
-    private static final long SEEK_TIME = 10_000; // 10 seconds
-
-    // API Service
+    // API & Session
     private EpisodeApiService episodeApiService;
-    
-    // User Session Manager
     private UserSessionManager sessionManager;
 
     @Override
@@ -98,27 +75,18 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exo_video_player);
 
-        // Keep screen on while playing
+        // Giữ màn hình sáng
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // Get intent data
         getIntentData();
 
-        // Initialize API
         episodeApiService = RetrofitClient.getEpisodeApiService();
-        
-        // Initialize session manager
         sessionManager = new UserSessionManager(this);
 
-        // Initialize views
         initViews();
-
-        // Setup components
-        setupRecyclerView();
         setupExoPlayer();
-        setupControls();
 
-        // Load episodes from API
+        // Load danh sách để lấy URL và hỗ trợ next bài
         loadEpisodesFromApi();
     }
 
@@ -126,50 +94,48 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
         Intent intent = getIntent();
         movieId = intent.getIntExtra(EXTRA_MOVIE_ID, -1);
         episodeId = intent.getIntExtra(EXTRA_EPISODE_ID, -1);
-        movieTitle = intent.getStringExtra(EXTRA_MOVIE_TITLE);
-
-        Log.d(TAG, "Intent data - MovieId: " + movieId + ", EpisodeId: " + episodeId + ", Title: " + movieTitle);
     }
 
     private void initViews() {
         playerView = findViewById(R.id.player_view);
-        videoContainer = findViewById(R.id.video_container);
-        episodesContainer = findViewById(R.id.episodes_container);
+        loadingProgressBar = findViewById(R.id.progress_bar);
         btnBack = findViewById(R.id.btn_back);
-        btnRewind = findViewById(R.id.btn_rewind);
-        btnForward = findViewById(R.id.btn_forward);
-        btnFullscreen = findViewById(R.id.btn_fullscreen);
-        rvEpisodes = findViewById(R.id.rv_episodes);
-        progressBar = findViewById(R.id.progress_bar);
+
+        // XỬ LÝ NÚT BACK: Đóng Activity để quay về Fragment cũ
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void setupExoPlayer() {
-        exoPlayer = new ExoPlayer.Builder(this).build();
+        // 1. Cấu hình Player
+        exoPlayer = new ExoPlayer.Builder(this)
+                .setSeekBackIncrementMs(10000)
+                .setSeekForwardIncrementMs(10000)
+                .build();
+
         playerView.setPlayer(exoPlayer);
-        
-        // Hide default controls, we'll use custom ones
-        playerView.setUseController(false);
-        
-        // Set background color to prevent black bars
-        playerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-        
-        // Player event listener
+
+        // 2. Cấu hình Controller
+        playerView.setUseController(true);
+        playerView.setShowNextButton(true); // Giữ nút Next để user bấm qua bài
+        playerView.setShowPreviousButton(true);
+        playerView.setControllerAutoShow(true);
+
+        // 3. Xử lý Fullscreen
+        playerView.setFullscreenButtonClickListener(isFullScreen -> {
+            if (isFullScreen) {
+                enterFullscreen();
+            } else {
+                exitFullscreen();
+            }
+        });
+
+        // 4. Lắng nghe sự kiện
         exoPlayer.addListener(new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
-                if (playbackState == Player.STATE_BUFFERING) {
-                    progressBar.setVisibility(View.VISIBLE);
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                }
-                
+                // Tự động chuyển tập khi hết phim
                 if (playbackState == Player.STATE_ENDED) {
                     playNextEpisode();
-                }
-                
-                // Show controls when video is ready
-                if (playbackState == Player.STATE_READY) {
-                    showControls();
                 }
             }
 
@@ -178,86 +144,49 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
                 Log.e(TAG, "ExoPlayer error: " + error.getMessage());
                 Toast.makeText(ExoVideoPlayerActivity.this, "Error playing video", Toast.LENGTH_SHORT).show();
             }
-        });
 
-        // Click listener to toggle controls
-        playerView.setOnClickListener(v -> toggleControls());
-    }
-
-    private void setupControls() {
-        btnBack.setOnClickListener(v -> finish());
-        
-        btnRewind.setOnClickListener(v -> {
-            long currentPosition = exoPlayer.getCurrentPosition();
-            long newPosition = Math.max(0, currentPosition - SEEK_TIME);
-            exoPlayer.seekTo(newPosition);
-            showControls();
+            // Ẩn hiện nút Back cùng với Controller cho đẹp (Optional)
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                // Bạn có thể custom logic ẩn hiện nút back ở đây nếu muốn
+            }
         });
-        
-        btnForward.setOnClickListener(v -> {
-            long currentPosition = exoPlayer.getCurrentPosition();
-            long duration = exoPlayer.getDuration();
-            long newPosition = Math.min(duration, currentPosition + SEEK_TIME);
-            exoPlayer.seekTo(newPosition);
-            showControls();
-        });
-        
-        btnFullscreen.setOnClickListener(v -> toggleFullscreen());
-    }
-
-    private void setupRecyclerView() {
-        episodeAdapter = new VideoEpisodeAdapter(episodeList, this::onEpisodeSelected);
-        rvEpisodes.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvEpisodes.setAdapter(episodeAdapter);
     }
 
     private void loadEpisodesFromApi() {
-        if (movieId == -1) {
-            Toast.makeText(this, "Invalid movie ID", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (movieId == -1) return;
 
-        progressBar.setVisibility(View.VISIBLE);
+        loadingProgressBar.setVisibility(View.VISIBLE);
 
         Call<List<Episode>> call = episodeApiService.getMovieEpisodes(movieId);
         call.enqueue(new Callback<List<Episode>>() {
             @Override
             public void onResponse(Call<List<Episode>> call, Response<List<Episode>> response) {
-                progressBar.setVisibility(View.GONE);
-                
+                loadingProgressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     episodeList.clear();
                     episodeList.addAll(response.body());
-                    episodeAdapter.notifyDataSetChanged();
+                    // Không cần notify Adapter nữa vì đã xóa RecyclerView
 
-                    // Find and play the requested episode
                     findAndPlayEpisode();
-                } else {
-                    Toast.makeText(ExoVideoPlayerActivity.this, "Failed to load episodes", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Episode>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Failed to load episodes", t);
+                loadingProgressBar.setVisibility(View.GONE);
                 Toast.makeText(ExoVideoPlayerActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void findAndPlayEpisode() {
-        if (episodeList.isEmpty()) {
-            Toast.makeText(this, "No episodes available", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (episodeList.isEmpty()) return;
 
-        // Find episode by ID or play first episode
         Episode episodeToPlay = null;
         for (int i = 0; i < episodeList.size(); i++) {
-            Episode episode = episodeList.get(i);
-            if (episode.getId() == episodeId) {
-                episodeToPlay = episode;
+            if (episodeList.get(i).getId() == episodeId) {
+                episodeToPlay = episodeList.get(i);
                 currentEpisodePosition = i;
                 break;
             }
@@ -272,146 +201,88 @@ public class ExoVideoPlayerActivity extends AppCompatActivity {
     }
 
     private void playEpisode(Episode episode) {
-        if (episode == null) {
-            Toast.makeText(this, "Episode data is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (episode == null) return;
 
-        // ✅ IMPROVED: Use centralized premium check logic
+        // Check Premium
         if (!PremiumUtils.canUserAccessEpisode(episode, sessionManager)) {
             PremiumUtils.showPremiumDialog(this, episode);
             PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), false);
             return;
         }
-
-        // Log successful premium access
         PremiumUtils.logPremiumAccess(episode, sessionManager.isPremium(), true);
 
+        // Play Video
         String videoUrl = episode.getVideoUrl();
-        if (videoUrl == null || videoUrl.isEmpty()) {
-            Toast.makeText(this, "Video URL not available", Toast.LENGTH_SHORT).show();
-            return;
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            MediaItem mediaItem = MediaItem.fromUri(videoUrl);
+            exoPlayer.setMediaItem(mediaItem);
+            exoPlayer.prepare();
+            exoPlayer.play();
         }
-
-
-        // Create media item and play
-        MediaItem mediaItem = MediaItem.fromUri(videoUrl);
-        exoPlayer.setMediaItem(mediaItem);
-        exoPlayer.prepare();
-        exoPlayer.play();
-
-        // Update episode adapter selection
-        episodeAdapter.setCurrentPlayingPosition(currentEpisodePosition);
-    }
-
-    private void onEpisodeSelected(Episode episode, int position) {
-        currentEpisodePosition = position;
-        playEpisode(episode);
     }
 
     private void playNextEpisode() {
         if (currentEpisodePosition < episodeList.size() - 1) {
             currentEpisodePosition++;
-            Episode nextEpisode = episodeList.get(currentEpisodePosition);
-            playEpisode(nextEpisode);
+            Toast.makeText(this, "Playing next episode...", Toast.LENGTH_SHORT).show();
+            playEpisode(episodeList.get(currentEpisodePosition));
         } else {
-            Toast.makeText(this, "No more episodes", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "End of series", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void toggleControls() {
-        if (controlsVisible) {
-            hideControls();
-        } else {
-            showControls();
-        }
-    }
-
-    private void showControls() {
-        btnBack.setVisibility(View.VISIBLE);
-        btnRewind.setVisibility(View.VISIBLE);
-        btnForward.setVisibility(View.VISIBLE);
-        btnFullscreen.setVisibility(View.VISIBLE);
-        episodesContainer.setVisibility(View.VISIBLE);
-        controlsVisible = true;
-
-        // Auto-hide controls after delay
-        handler.removeCallbacksAndMessages(null);
-        handler.postDelayed(this::hideControls, CONTROL_HIDE_DELAY);
-    }
-
-    private void hideControls() {
-        btnBack.setVisibility(View.GONE);
-        btnRewind.setVisibility(View.GONE);
-        btnForward.setVisibility(View.GONE);
-        btnFullscreen.setVisibility(View.GONE);
-        episodesContainer.setVisibility(View.GONE);
-        controlsVisible = false;
-    }
-
-    private void toggleFullscreen() {
-        if (isFullscreen) {
-            exitFullscreen();
-        } else {
-            enterFullscreen();
-        }
-    }
+    // --- Logic Fullscreen (Đơn giản hơn vì không còn List Episodes) ---
 
     private void enterFullscreen() {
         isFullscreen = true;
-        
-        // Hide system UI
-        WindowInsetsControllerCompat windowInsetsController = 
-            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+
+        // 1. Ẩn UI hệ thống
+        WindowInsetsControllerCompat windowInsetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         windowInsetsController.setSystemBarsBehavior(
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-        
-        // Set landscape orientation
+
+        // 2. Xoay ngang
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        
-        // Update fullscreen button icon
-        btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit);
-        
-        // Hide episodes container in fullscreen
-        episodesContainer.setVisibility(View.GONE);
+
+        // 3. Tràn tai thỏ
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams params = getWindow().getAttributes();
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(params);
+        }
     }
 
     private void exitFullscreen() {
         isFullscreen = false;
-        
-        // Show system UI
-        WindowInsetsControllerCompat windowInsetsController = 
-            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+
+        // 1. Hiện UI hệ thống
+        WindowInsetsControllerCompat windowInsetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
-        
-        // Set portrait orientation
+
+        // 2. Xoay dọc
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        
-        // Update fullscreen button icon
-        btnFullscreen.setImageResource(R.drawable.ic_fullscreen);
-        
-        // Show episodes container
-        if (controlsVisible) {
-            episodesContainer.setVisibility(View.VISIBLE);
+
+        // 3. Reset tai thỏ
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams params = getWindow().getAttributes();
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+            getWindow().setAttributes(params);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (exoPlayer != null) {
-            exoPlayer.pause();
-        }
+        if (exoPlayer != null) exoPlayer.pause();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
-        if (exoPlayer != null) {
-            exoPlayer.release();
-        }
+        if (exoPlayer != null) exoPlayer.release();
     }
 
     @Override

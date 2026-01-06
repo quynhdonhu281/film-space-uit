@@ -1,18 +1,22 @@
 package com.example.filmspace_mobile.ui.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.filmspace_mobile.R;
 import com.example.filmspace_mobile.data.model.movie.Episode;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeViewHolder> {
+
+    // Tag để debug trong Logcat
+    private static final String TAG = "EpisodeAdapter";
 
     private List<Episode> episodeList;
     private OnEpisodeClickListener listener;
@@ -23,7 +27,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     }
 
     public EpisodeAdapter(List<Episode> episodeList, OnEpisodeClickListener listener, boolean userIsPremium) {
-        this.episodeList = episodeList;
+        this.episodeList = episodeList != null ? episodeList : new ArrayList<>();
         this.listener = listener;
         this.userIsPremium = userIsPremium;
     }
@@ -39,6 +43,12 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     @Override
     public void onBindViewHolder(@NonNull EpisodeViewHolder holder, int position) {
         Episode episode = episodeList.get(position);
+
+        // DEBUG: Kiểm tra dữ liệu từng dòng xem có đúng là Premium không
+        if (episode.isPremium()) {
+            Log.d(TAG, "Item " + position + ": " + episode.getTitle() + " LÀ PREMIUM. User VIP: " + userIsPremium);
+        }
+
         holder.bind(episode);
     }
 
@@ -47,42 +57,16 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
         return episodeList != null ? episodeList.size() : 0;
     }
 
+    // 1. Cập nhật danh sách phim (Dùng notifyDataSetChanged cho chắc chắn)
     public void updateData(List<Episode> newEpisodeList) {
-        // this.episodeList = newEpisodeList;
-        // notifyDataSetChanged();
-        final List<Episode> finalNewList = newEpisodeList != null ? newEpisodeList : new java.util.ArrayList<>();
-        
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() {
-                return episodeList.size();
-            }
+        this.episodeList = newEpisodeList != null ? newEpisodeList : new ArrayList<>();
+        notifyDataSetChanged();
+    }
 
-            @Override
-            public int getNewListSize() {
-                return finalNewList.size();
-            }
-
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                Episode oldEpisode = episodeList.get(oldItemPosition);
-                Episode newEpisode = finalNewList.get(newItemPosition);
-                return oldEpisode.getId() == newEpisode.getId();
-            }
-
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                Episode oldEpisode = episodeList.get(oldItemPosition);
-                Episode newEpisode = finalNewList.get(newItemPosition);
-                return oldEpisode.getId() == newEpisode.getId() &&
-                        oldEpisode.getTitle().equals(newEpisode.getTitle()) &&
-                        oldEpisode.getDuration() == newEpisode.getDuration() &&
-                        oldEpisode.isPremium() == newEpisode.isPremium();
-            }
-        });
-        
-        this.episodeList = finalNewList;
-        diffResult.dispatchUpdatesTo(this);
+    // 2. [QUAN TRỌNG] Hàm mới để cập nhật trạng thái User mà không cần tạo lại Adapter
+    public void setUserIsPremium(boolean isPremium) {
+        this.userIsPremium = isPremium;
+        notifyDataSetChanged(); // Vẽ lại giao diện ngay lập tức
     }
 
     class EpisodeViewHolder extends RecyclerView.ViewHolder {
@@ -104,6 +88,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     Episode episode = episodeList.get(position);
+                    // Luôn cho phép click để Fragment xử lý logic (hiện Dialog mua)
                     listener.onEpisodeClick(episode);
                 }
             });
@@ -113,17 +98,35 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
             tvEpisodeNumber.setText(String.valueOf(episode.getEpisodeNumber()));
             tvEpisodeTitle.setText(episode.getTitle());
             tvEpisodeDuration.setText(episode.getFormattedDuration());
-            
-            // Hide playing indicator (only used in video player)
+
+            // 1. Reset trạng thái mặc định (tránh lỗi hiển thị sai do tái sử dụng View)
             ivPlayingIndicator.setVisibility(View.GONE);
-            
-            // Show/hide premium badge
-            ivPremiumBadge.setVisibility(episode.isPremium() ? View.VISIBLE : View.GONE);
-            
-            // Check if episode is locked: episode is premium AND user is not premium
-            boolean isLocked = episode.isPremium() && !userIsPremium;
-            itemView.setEnabled(!isLocked);
-            itemView.setAlpha(isLocked ? 0.5f : 1.0f);
+            ivPremiumBadge.setVisibility(View.GONE);
+            itemView.setAlpha(1.0f);
+
+            // 2. LOGIC HIỂN THỊ PREMIUM
+            if (episode.isPremium()) {
+                // Luôn hiện icon nếu là tập Premium
+                ivPremiumBadge.setVisibility(View.VISIBLE);
+
+                // Gán cứng icon ổ khóa (đảm bảo hiện kể cả khi XML quên set src)
+                ivPremiumBadge.setImageResource(R.drawable.ic_lock);
+
+                // Kiểm tra xem User đã mua gói chưa
+                boolean isLocked = !userIsPremium; // Premium + Chưa mua = Khóa
+
+                if (isLocked) {
+                    // Nếu bị khóa: Làm mờ item 50%
+                    itemView.setAlpha(0.5f);
+                } else {
+                    // Nếu ĐÃ MUA: Sáng rõ 100%
+                    itemView.setAlpha(1.0f);
+
+                    // (Tùy chọn) Nếu muốn đổi icon ổ khóa thành icon khác khi đã mua:
+                    // ivPremiumBadge.setImageResource(R.drawable.ic_check);
+                }
+            }
+            // Nếu không phải Premium thì code đã chạy ở phần Reset (GONE, Alpha 1.0) rồi.
         }
     }
 }

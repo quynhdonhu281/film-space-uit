@@ -15,17 +15,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
         // Use your actual IP (e.g., 10.0.104.68) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://fe4b4e4f0b91.ngrok-free.app/\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://fe4b4e4f0b91.ngrok-free.app/\"")
         }
         release {
             isMinifyEnabled = true
@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    
+
     // Testing Dependencies
     testImplementation(libs.junit)
     testImplementation("org.mockito:mockito-core:5.8.0")
@@ -79,7 +79,7 @@ dependencies {
     // ViewModel and LiveData
     implementation ("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
-    
+
     // Paging 3 for pagination
     implementation ("androidx.paging:paging-runtime:3.3.5")
 
@@ -90,18 +90,20 @@ dependencies {
 
     // Security - EncryptedSharedPreferences
     implementation ("androidx.security:security-crypto:1.1.0")
-    
+
     // Shimmer effect for skeleton loading
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
-    
+
     // SwipeRefreshLayout for pull-to-refresh
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    
-    // ExoPlayer for advanced video playback
+
+    // --- EXO PLAYER (Đã sửa) ---
     implementation ("androidx.media3:media3-exoplayer:1.2.1")
     implementation ("androidx.media3:media3-ui:1.2.1")
     implementation ("androidx.media3:media3-common:1.2.1")
-    
+    // Dòng này rất quan trọng để fix lỗi Crash "No suitable media source factory":
+    implementation ("androidx.media3:media3-exoplayer-hls:1.2.1")
+
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)

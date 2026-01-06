@@ -3,9 +3,11 @@ package com.example.filmspace_mobile.data.api;
 import com.example.filmspace_mobile.data.model.auth.*;
 import com.example.filmspace_mobile.data.model.history.AddToHistoryRequest;
 import com.example.filmspace_mobile.data.model.history.WatchHistoryResponse;
+import com.example.filmspace_mobile.data.model.movie.Cast;
 import com.example.filmspace_mobile.data.model.movie.CreateReviewRequest;
 import com.example.filmspace_mobile.data.model.movie.Genre;
 import com.example.filmspace_mobile.data.model.movie.Movie;
+import com.example.filmspace_mobile.data.model.movie.MovieViewResponse;
 import com.example.filmspace_mobile.data.model.movie.RecommendationsResponse;
 import com.example.filmspace_mobile.data.model.movie.Review;
 
@@ -105,10 +107,14 @@ public interface ApiService {
     @DELETE("api/history/clear")
     Call<Void> clearAllHistory();
 
+    @GET("api/casts")
+    Call<List<Cast>> getAllCasts();
+
     // Review endpoints
     @POST("api/Reviews")
     Call<Review> createReview(@Body CreateReviewRequest request);
-
+    @GET("api/history/movie/{movieId}/views")
+    Call<MovieViewResponse> getMovieViews(@Path("movieId") int movieId);
     @GET("api/history/recommendations")
     Call<RecommendationsResponse> getRecommendedMovies(@Query("limit") int limit);
 }

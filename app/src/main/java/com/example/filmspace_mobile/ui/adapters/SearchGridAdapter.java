@@ -20,9 +20,6 @@ import com.example.filmspace_mobile.data.model.movie.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Adapter for displaying movies in a grid layout for search results
- */
 public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.ViewHolder> {
     private List<Movie> movies = new ArrayList<>();
     private Context context;
@@ -45,6 +42,7 @@ public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
+        // Layout này phải là layout Grid (Netflix style) bạn đã sửa ở các bước trước
         View view = LayoutInflater.from(context).inflate(R.layout.viewholder_film, parent, false);
         return new ViewHolder(view);
     }
@@ -52,32 +50,20 @@ public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Movie movie = movies.get(position);
-        
-        // Set title with null check
-        String title = movie.getTitle();
-        if (title != null && !title.isEmpty()) {
-            holder.title.setText(title);
-            holder.title.setVisibility(View.VISIBLE);
-        } else {
-            holder.title.setText("Unknown Title");
-            holder.title.setVisibility(View.VISIBLE);
+
+        // 1. Set Title (An toàn)
+        if (holder.title != null) {
+            holder.title.setText(movie.getTitle() != null ? movie.getTitle() : "Unknown");
         }
 
-        // Set genres
-        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
-            StringBuilder genresText = new StringBuilder();
-            for (int i = 0; i < Math.min(2, movie.getGenres().size()); i++) {
-                if (i > 0) genresText.append(", ");
-                genresText.append(movie.getGenres().get(i).getName());
-            }
-            holder.genres.setText(genresText.toString());
-            holder.genres.setVisibility(View.VISIBLE);
-        } else {
-            holder.genres.setVisibility(View.GONE);
+        // 2. Set Rating (MỚI - Khớp với XML mới)
+        if (holder.tvRating != null) {
+            holder.tvRating.setText(String.valueOf(movie.getRating()));
         }
 
-        RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(30));
+        // 3. Set Poster
+        RequestOptions requestOptions = new RequestOptions()
+                .transform(new CenterCrop(), new RoundedCorners(20));
 
         Glide.with(context)
                 .load(movie.getPosterUrl())
@@ -86,8 +72,9 @@ public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.Vi
                 .error(R.drawable.movie_poster_placeholder)
                 .into(holder.pic);
 
+        // 4. Click Listener
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null && movie.getId() > 0) {
+            if (listener != null) {
                 listener.onMovieClick(movie);
             }
         });
@@ -100,14 +87,16 @@ public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title;
-        TextView genres;
         ImageView pic;
+        TextView tvRating; // Thêm Rating để khớp XML mới
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.filmTitle);
-            genres = itemView.findViewById(R.id.filmGenres);
             pic = itemView.findViewById(R.id.pic);
+            tvRating = itemView.findViewById(R.id.tvRating); // Ánh xạ Rating
+
+            // LƯU Ý: Đã bỏ filmGenres vì trong XML Netflix style không còn ID này
         }
     }
 }

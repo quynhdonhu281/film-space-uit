@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -32,8 +33,8 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="The Vanishing of Will Byers"
-            android:textColor="@color/black"
+            tools:text="Tên tập phim mẫu"
+            android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -42,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="49 min"
+            tools:text="45 min"
             android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
 
@@ -59,10 +60,13 @@
 
     <ImageView
         android:id="@+id/ivPremiumBadge"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginStart="8dp"
-        android:src="@drawable/ic_premium"
-        android:visibility="gone" />
+        android:src="@drawable/ic_lock"
+        app:tint="#000000"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </LinearLayout>

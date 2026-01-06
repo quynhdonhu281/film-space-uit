@@ -31,6 +31,13 @@ public class Movie implements Serializable {
     
     @SerializedName("casts")
     private List<Cast> castList;
+    public List<Cast> getCasts() {
+        return castList;
+    }
+
+    public void setCasts(List<Cast> casts) {
+        this.castList = casts;
+    }
     
     private List<Episode> episodes;
     private List<Review> reviews;

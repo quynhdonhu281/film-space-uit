@@ -16,7 +16,10 @@ import java.security.GeneralSecurityException;
 
 public class UserSessionManager {
     private static final String TAG = "UserSessionManager";
+    // Tên file SharedPreferences (được mã hóa)
     private static final String PREF_NAME = "filmspace_mobile_secure_session";
+
+    // Các Key để lưu dữ liệu
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_USERNAME = "username";
@@ -27,19 +30,19 @@ public class UserSessionManager {
     private static final String KEY_IS_PREMIUM = "isPremium";
 
     private final SharedPreferences prefs;
-    
-    // LiveData for reactive auth state
+
+    // LiveData để theo dõi trạng thái đăng nhập (Reactive UI)
     private final MutableLiveData<Boolean> isLoggedInLiveData = new MutableLiveData<>();
 
     public UserSessionManager(Context context) {
         SharedPreferences tempPrefs;
         try {
-            // Create or retrieve master key for encryption
+            // Tạo Master Key để mã hóa
             MasterKey masterKey = new MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
 
-            // Create encrypted shared preferences
+            // Tạo EncryptedSharedPreferences (An toàn hơn SharedPreferences thường)
             tempPrefs = EncryptedSharedPreferences.create(
                     context,
                     PREF_NAME,
@@ -51,34 +54,34 @@ public class UserSessionManager {
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "Failed to create encrypted preferences, falling back to standard", e);
             }
-            // Fallback to standard SharedPreferences if encryption fails
+            // Fallback về chế độ thường nếu thiết bị không hỗ trợ mã hóa
             tempPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         }
         prefs = tempPrefs;
-        
-        // Initialize LiveData with current state
+
+        // Cập nhật trạng thái LiveData ban đầu
         isLoggedInLiveData.setValue(isLoggedIn());
     }
-    
+
     /**
-     * Get LiveData for auth state - UI can observe this
+     * Lấy LiveData trạng thái đăng nhập để UI observe
      */
     public LiveData<Boolean> getIsLoggedInLiveData() {
         return isLoggedInLiveData;
     }
 
     /**
-     * Save user session after successful login/register
-     * Always clears old user data before storing new user (only 1 user stored at a time)
+     * Lưu session người dùng sau khi Login/Register thành công
+     * Hàm này sẽ xóa dữ liệu cũ trước khi lưu mới
      */
-    public void saveUserSession(int userId, String username, String email, 
-                                 String avatarUrl, String name, String token, boolean isPremium) {
+    public void saveUserSession(int userId, String username, String email,
+                                String avatarUrl, String name, String token, boolean isPremium) {
         SharedPreferences.Editor editor = prefs.edit();
-        
-        // Clear any existing user data first
+
+        // Xóa dữ liệu cũ
         editor.clear();
-        
-        // Save new user session
+
+        // Lưu dữ liệu mới
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putInt(KEY_USER_ID, userId);
         editor.putString(KEY_USERNAME, username);
@@ -88,81 +91,92 @@ public class UserSessionManager {
         editor.putString(KEY_TOKEN, token);
         editor.putBoolean(KEY_IS_PREMIUM, isPremium);
         editor.apply();
-        
-        // Update LiveData
+
+        // Báo cho UI biết đã đăng nhập
         isLoggedInLiveData.postValue(true);
     }
 
     /**
-     * Check if user is logged in
+     * [MỚI - QUAN TRỌNG] Cập nhật trạng thái Premium riêng lẻ
+     * Dùng hàm này trong PaymentReturnActivity sau khi thanh toán thành công
+     */
+    public void setPremium(boolean isPremium) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_IS_PREMIUM, isPremium);
+        editor.apply();
+        Log.d(TAG, "setPremium: Updated premium status to " + isPremium);
+    }
+
+    /**
+     * Kiểm tra đã đăng nhập chưa
      */
     public boolean isLoggedIn() {
         return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
     /**
-     * Get user ID
+     * Lấy User ID
      */
     public int getUserId() {
         return prefs.getInt(KEY_USER_ID, -1);
     }
 
     /**
-     * Get username
+     * Lấy Username
      */
     public String getUsername() {
         return prefs.getString(KEY_USERNAME, null);
     }
 
     /**
-     * Get email
+     * Lấy Email
      */
     public String getEmail() {
         return prefs.getString(KEY_EMAIL, null);
     }
 
     /**
-     * Get avatar URL
+     * Lấy Avatar URL
      */
     public String getAvatarUrl() {
         return prefs.getString(KEY_AVATAR_URL, null);
     }
 
     /**
-     * Get name
+     * Lấy tên hiển thị
      */
     public String getName() {
         return prefs.getString(KEY_NAME, null);
     }
 
     /**
-     * Get auth token
+     * Lấy Token xác thực
      */
     public String getToken() {
         return prefs.getString(KEY_TOKEN, null);
     }
 
     /**
-     * Check if user is premium
+     * Kiểm tra user có phải là Premium không
      */
     public boolean isPremium() {
         return prefs.getBoolean(KEY_IS_PREMIUM, false);
     }
 
     /**
-     * Clear user session (logout)
+     * Xóa session (Đăng xuất)
      */
     public void clearSession() {
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.apply();
-        
-        // Update LiveData
+
+        // Báo cho UI biết đã đăng xuất
         isLoggedInLiveData.postValue(false);
     }
 
     /**
-     * Update avatar URL
+     * Cập nhật Avatar URL riêng lẻ
      */
     public void updateAvatarUrl(String avatarUrl) {
         SharedPreferences.Editor editor = prefs.edit();
@@ -171,7 +185,7 @@ public class UserSessionManager {
     }
 
     /**
-     * Update user name
+     * Cập nhật tên hiển thị riêng lẻ
      */
     public void updateName(String name) {
         SharedPreferences.Editor editor = prefs.edit();
