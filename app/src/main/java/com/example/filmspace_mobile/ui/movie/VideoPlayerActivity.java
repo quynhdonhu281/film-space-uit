@@ -1,5 +1,6 @@
 package com.example.filmspace_mobile.ui.movie;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -10,6 +11,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -342,10 +344,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
         episodeAdapter = new VideoEpisodeAdapter(episodeList, (episode, position) -> {
             // Check if episode is premium and user is not premium
             if (episode.isPremium() && !isPremiumUser()) {
-                // Navigate to subscription screen
-                Intent intent = new Intent(VideoPlayerActivity.this,
-                        SubscriptionDescriptionActivity.class);
-                startActivity(intent);
+                // Show premium dialog instead of navigating to activity
+                showPremiumDialog();
                 return;
             }
 
@@ -712,9 +712,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 Toast.makeText(this, "This episode requires premium subscription",
                         Toast.LENGTH_LONG).show();
 
-                // Show subscription dialog
-                Intent intent = new Intent(this, SubscriptionDescriptionActivity.class);
-                startActivity(intent);
+                // Show premium dialog instead of navigating to activity
+                showPremiumDialog();
                 return;
             }
 
@@ -736,5 +735,37 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (progressBar != null) {
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
+    }
+
+    // ==============================
+    // Premium Dialog
+    // ==============================
+
+    private void showPremiumDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_premium_episode);
+        dialog.setCancelable(true);
+
+        // Get dialog window and set properties
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Get buttons
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        Button btnUpgrade = dialog.findViewById(R.id.btn_upgrade);
+
+        // Cancel button
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        // Upgrade button
+        btnUpgrade.setOnClickListener(v -> {
+            dialog.dismiss();
+            // Navigate to subscription screen
+            Intent intent = new Intent(VideoPlayerActivity.this, SubscriptionDescriptionActivity.class);
+            startActivity(intent);
+        });
+
+        dialog.show();
     }
 }

@@ -8,9 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.example.filmspace_mobile.data.local.UserSessionManager;
-import com.example.filmspace_mobile.data.model.movie.Genre;
 import com.example.filmspace_mobile.data.model.movie.Movie;
-import com.example.filmspace_mobile.data.repository.GenreRepository;
 import com.example.filmspace_mobile.data.repository.MovieRepository;
 import com.example.filmspace_mobile.data.repository.RepositoryCallback;
 
@@ -75,43 +73,48 @@ public class HomeViewModel extends ViewModel {
         return moviesErrorLiveData;
     }
 
-    // Load slider and top rating movies
+    // Load slider and top rating movies with correct endpoints
     public void loadMovies() {
         moviesLoadingLiveData.setValue(true);
-
-        movieRepository.getAllMovies(new RepositoryCallback<List<Movie>>() {
+        
+        // Load paginated movies for slider (first page, 10 items)
+        movieRepository.getMoviesPaginated(1, 10, new RepositoryCallback<List<Movie>>() {
             @Override
-            public void onSuccess(List<Movie> data) {
-                moviesLoadingLiveData.setValue(false);
-                
-                // Limit movies to prevent memory issues and UI lag
-                // Keep first 50 movies for slider to reduce memory footprint
-                List<Movie> limitedData = data;
-                if (data != null && data.size() > 50) {
-                    limitedData = new ArrayList<>(data.subList(0, 50));
+            public void onSuccess(List<Movie> movies) {
+                if (movies != null && !movies.isEmpty()) {
+                    // Limit to 5 movies for slider to improve performance
+                    List<Movie> sliderMovies = movies.size() > 5 ? 
+                        movies.subList(0, 5) : movies;
+                    sliderMoviesLiveData.setValue(sliderMovies);
                 }
                 
-                // Set slider movies
-                sliderMoviesLiveData.setValue(limitedData);
-                
-                // Sort by rating descending and take top 10 movies
-                if (limitedData != null && !limitedData.isEmpty()) {
-                    List<Movie> topMovies = new ArrayList<>(limitedData);
-                    Collections.sort(topMovies, new Comparator<Movie>() {
-                        @Override
-                        public int compare(Movie m1, Movie m2) {
-                            return Double.compare(m2.getRating(), m1.getRating());
-                        }
-                    });
-                    int topCount = Math.min(10, topMovies.size());
-                    topRatingMoviesLiveData.setValue(topMovies.subList(0, topCount));
-                }
+                // Load top rated movies after a short delay to prevent simultaneous requests
+                mainHandler.postDelayed(() -> loadTopRatedMovies(), 200);
             }
 
             @Override
             public void onError(String error) {
-                moviesLoadingLiveData.setValue(false);
                 moviesErrorLiveData.setValue(error);
+                moviesLoadingLiveData.setValue(false);
+            }
+        });
+    }
+
+    private void loadTopRatedMovies() {
+        // Load top rated movies using movie ID 1 with limit 20
+        movieRepository.getTopRatedMovies(1, 20, new RepositoryCallback<List<Movie>>() {
+            @Override
+            public void onSuccess(List<Movie> movies) {
+                if (movies != null) {
+                    topRatingMoviesLiveData.setValue(movies);
+                }
+                moviesLoadingLiveData.setValue(false);
+            }
+
+            @Override
+            public void onError(String error) {
+                moviesErrorLiveData.setValue(error);
+                moviesLoadingLiveData.setValue(false);
             }
         });
     }

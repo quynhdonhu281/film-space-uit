@@ -53,6 +53,85 @@ public class MovieRepository {
     }
 
     /**
+     * Fetch movies with pagination for better performance
+     * @param page Page number (starting from 1)
+     * @param pageSize Number of items per page
+     * @param callback Callback to handle success or failure
+     */
+    public void getMoviesPaginated(int page, int pageSize, RepositoryCallback<List<Movie>> callback) {
+        apiService.getMoviesPaginated(page, pageSize).enqueue(new Callback<List<Movie>>() {
+            @Override
+            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    String errorMessage = getHttpErrorMessage(response.code());
+                    callback.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Movie>> call, Throwable t) {
+                String errorMessage = getNetworkErrorMessage(t);
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Fetch top rated movies using fallback to getAllMovies and sort by rating
+     */
+    public void getTopRatedMovies(int movieId, int limit, RepositoryCallback<List<Movie>> callback) {
+        // First try the specific endpoint
+        apiService.getTopRatedMovies(movieId, limit).enqueue(new Callback<List<Movie>>() {
+            @Override
+            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    // Fallback to getAllMovies and sort by rating
+                    getAllMoviesAndSortByRating(limit, callback);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Movie>> call, Throwable t) {
+                // Fallback to getAllMovies and sort by rating
+                getAllMoviesAndSortByRating(limit, callback);
+            }
+        });
+    }
+
+    /**
+     * Fallback method to get all movies and sort by rating
+     */
+    private void getAllMoviesAndSortByRating(int limit, RepositoryCallback<List<Movie>> callback) {
+        apiService.getAllMoviesForTopRated().enqueue(new Callback<List<Movie>>() {
+            @Override
+            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Movie> movies = response.body();
+                    // Sort by rating descending
+                    movies.sort((m1, m2) -> Double.compare(m2.getRating(), m1.getRating()));
+                    // Limit results
+                    List<Movie> topRated = movies.size() > limit ? 
+                        movies.subList(0, limit) : movies;
+                    callback.onSuccess(topRated);
+                } else {
+                    String errorMessage = getHttpErrorMessage(response.code());
+                    callback.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Movie>> call, Throwable t) {
+                String errorMessage = getNetworkErrorMessage(t);
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
+    /**
      * Fetch movies by genre ID
      * @param genreId The genre ID to filter movies
      * @param callback Callback to handle success or failure

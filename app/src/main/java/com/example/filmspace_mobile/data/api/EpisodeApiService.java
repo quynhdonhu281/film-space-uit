@@ -11,13 +11,13 @@ import retrofit2.http.Path;
 
 public interface EpisodeApiService {
 
-    @GET("movies/{movieId}/episodes")
+    @GET("movies/{movieId}/Episodes")
     Call<List<Episode>> getMovieEpisodes(@Path("movieId") int movieId);
 
-    @GET("movies/{movieId}/episodes")
+    @GET("movies/{movieId}/Episodes")
     Call<EpisodeListResponse> getMovieEpisodesWrapped(@Path("movieId") int movieId);
 
-    @GET("movies/{movieId}/episodes/{episodeId}")
+    @GET("movies/{movieId}/Episodes/{episodeId}")
     Call<Episode> getEpisode(
             @Path("movieId") int movieId,
             @Path("episodeId") int episodeId

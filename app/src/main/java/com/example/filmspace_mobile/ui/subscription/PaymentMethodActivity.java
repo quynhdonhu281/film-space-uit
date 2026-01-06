@@ -171,7 +171,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
                 userId,
                 planId,
                 planName,
-                totalAmount,
+                (int) Math.round(totalAmount), // Cast to int
                 selectedPaymentMethod,
                 orderInfo
         );
@@ -199,7 +199,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
                                 .putString("pending_txn_ref", paymentResponse.getTxnRef())
                                 .putString("pending_plan_id", planId)
                                 .putString("pending_plan_name", planName)
-                                .putFloat("pending_amount", (float)request.getAmount())
+                                .putInt("pending_amount", request.getAmount()) // Change to putInt
                                 .apply();
 
                         Log.d(TAG, "Opening VNPay URL: " + paymentResponse.getPaymentUrl());
@@ -233,10 +233,13 @@ public class PaymentMethodActivity extends AppCompatActivity {
 
     private void openVNPayUrl(String paymentUrl) {
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
+            // Mở PaymentReturnActivity với WebView thay vì browser
+            Intent intent = new Intent(this, PaymentReturnActivity.class);
+            intent.putExtra("payment_url", paymentUrl);
+            intent.putExtra("user_id", getSharedPreferences("user_prefs", MODE_PRIVATE).getString("user_id", ""));
             startActivity(intent);
         } catch (Exception e) {
-            Log.e(TAG, "Error opening VNPay URL", e);
+            Log.e(TAG, "Error opening VNPay WebView", e);
             Toast.makeText(this, "Cannot open payment page", Toast.LENGTH_SHORT).show();
         }
     }

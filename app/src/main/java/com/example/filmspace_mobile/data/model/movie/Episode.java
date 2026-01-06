@@ -1,8 +1,10 @@
 package com.example.filmspace_mobile.data.model.movie;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class Episode {
+public class Episode implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @SerializedName("id")
     private int id;

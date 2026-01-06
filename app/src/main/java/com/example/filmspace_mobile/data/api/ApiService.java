@@ -72,6 +72,17 @@ public interface ApiService {
     @GET("api/Movies")
     Call<List<Movie>> getAllMovies();
 
+    // Pagination endpoints for better performance
+    @GET("api/Movies")
+    Call<List<Movie>> getMoviesPaginated(@Query("page") int page, @Query("pageSize") int pageSize);
+
+    @GET("api/Movies/{id}/rating")
+    Call<List<Movie>> getTopRatedMovies(@Path("id") int movieId, @Query("limit") int limit);
+
+    // Fallback method to get all movies for top rated
+    @GET("api/Movies")
+    Call<List<Movie>> getAllMoviesForTopRated();
+
     @GET("api/Movies/{id}")
     Call<Movie> getMovieById(@Path("id") int movieId);
 

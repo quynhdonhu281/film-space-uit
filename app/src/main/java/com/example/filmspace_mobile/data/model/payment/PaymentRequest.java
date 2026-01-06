@@ -14,7 +14,7 @@ public class PaymentRequest {
     private String planName;
 
     @SerializedName("amount")
-    private double amount;
+    private int amount;
 
     @SerializedName("paymentMethod")
     private String paymentMethod;
@@ -23,7 +23,7 @@ public class PaymentRequest {
     private String orderInfo;
 
     public PaymentRequest(String userId, String planId, String planName,
-                          double amount, String paymentMethod, String orderInfo) {
+                          int amount, String paymentMethod, String orderInfo) {
         this.userId = userId;
         this.planId = planId;
         this.planName = planName;
@@ -42,8 +42,8 @@ public class PaymentRequest {
     public String getPlanName() { return planName; }
     public void setPlanName(String planName) { this.planName = planName; }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public int getAmount() { return amount; }
+    public void setAmount(int amount) { this.amount = amount; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }

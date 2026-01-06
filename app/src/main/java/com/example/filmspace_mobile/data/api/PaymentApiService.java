@@ -15,10 +15,10 @@ import retrofit2.http.Query;
 public interface PaymentApiService {
 
     /**
-     * Create payment URL
-     * POST /payment/create
+     * Create VNPay payment URL
+     * POST /payment/create-vnpay-url
      */
-    @POST("payment/create")
+    @POST("payment/create-vnpay-url")
     Call<PaymentResponse> createPayment(@Body PaymentRequest request);
 
     /**

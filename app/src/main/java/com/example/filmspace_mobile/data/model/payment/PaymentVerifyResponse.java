@@ -3,7 +3,7 @@ package com.example.filmspace_mobile.data.model.payment;
 public class PaymentVerifyResponse {
     private boolean success;
     private String status;
-    private String userId;
+    private int userId;  // Changed to int for admin use
     private String planId;
     private String planName;
     private double amount;
@@ -15,7 +15,7 @@ public class PaymentVerifyResponse {
     }
 
     // Constructor đầy đủ
-    public PaymentVerifyResponse(boolean success, String status, String userId,
+    public PaymentVerifyResponse(boolean success, String status, int userId,
                                  String planId, String planName, double amount,
                                  String transactionId, String message) {
         this.success = success;
@@ -45,11 +45,11 @@ public class PaymentVerifyResponse {
         this.status = status;
     }
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
@@ -98,7 +98,7 @@ public class PaymentVerifyResponse {
         return "PaymentVerifyResponse{" +
                 "success=" + success +
                 ", status='" + status + '\'' +
-                ", userId='" + userId + '\'' +
+                ", userId=" + userId + 
                 ", planId='" + planId + '\'' +
                 ", planName='" + planName + '\'' +
                 ", amount=" + amount +

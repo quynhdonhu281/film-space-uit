@@ -26,6 +26,13 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 
+        <!-- ExoPlayer Video Player Activity -->
+        <activity
+            android:name=".ui.movie.ExoVideoPlayerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
         <!-- ==================== MAIN ACTIVITY (LAUNCHER) ==================== -->
         <activity
             android:name=".ui.splash.SplashActivity"
@@ -112,6 +119,27 @@
 
         <activity
             android:name=".ui.movie.MoviesByGenreActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <!-- ==================== SUBSCRIPTION ==================== -->
+        <activity
+            android:name=".ui.subscription.SubscriptionDescriptionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <activity
+            android:name=".ui.subscription.PaymentMethodActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <activity
+            android:name=".ui.subscription.PaymentSuccessActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
+
+        <activity
+            android:name=".ui.subscription.PaymentReturnActivity"
             android:exported="false"
             android:theme="@style/Theme.FilmSpace_Mobile.NoActionBar" />
 

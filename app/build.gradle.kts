@@ -19,13 +19,13 @@ android {
         // API Base URL configuration
         // Use 10.0.2.2 for Android Emulator to access host machine's localhost
         // Use your actual IP (e.g., 10.0.104.68) for physical device
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.104.68:8080\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app\"")
     }
 
     buildTypes {
         debug {
             // Use 10.0.2.2 for Android Emulator, change to your IP for physical device
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.104.68:8080\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://c6b8034bb8fb.ngrok-free.app\"")
         }
         release {
             isMinifyEnabled = true
@@ -96,6 +96,11 @@ dependencies {
     
     // SwipeRefreshLayout for pull-to-refresh
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    
+    // ExoPlayer for advanced video playback
+    implementation ("androidx.media3:media3-exoplayer:1.2.1")
+    implementation ("androidx.media3:media3-ui:1.2.1")
+    implementation ("androidx.media3:media3-common:1.2.1")
     
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
